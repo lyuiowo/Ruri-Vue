@@ -17,16 +17,20 @@ class AuthService(private val userRepository: UserRepository) {
      * @param password
      * @return
      */
-    fun login(email: String, password: String): List<String>? {
+    fun login(email: String, password: String): List<Map<String, String>>? {
         val user = userRepository.findByEmail(email);
         if (user != null) {
             if (user.isDeleted) {
                 throw RuntimeException("用户已被删除");
             }
-            if (user.verifyPassword(password)) {
+            if (!user.verifyPassword(password)) {
+                throw RuntimeException("密码错误");
+            } else {
                 val tokenSecret = generateTokenSecret();
                 val token = generateToken(user.userID.toString(), tokenSecret);
-                return listOf(token);
+                return listOf(
+                    mapOf("token" to token)
+                );
             }
         }
         return emptyList();
