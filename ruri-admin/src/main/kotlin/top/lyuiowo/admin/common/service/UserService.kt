@@ -24,7 +24,6 @@ class UserService(private val userRepository: UserRepository) {
             }
         }
         return emptyList()
-//        return if (existingUser?.isDeleted == false) listOf(existingUser) else emptyList();
     }
 
     /**

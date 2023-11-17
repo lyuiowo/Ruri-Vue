@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import top.lyuiowo.admin.common.model.User
 import top.lyuiowo.admin.common.service.UserService
-import top.lyuiowo.admin.common.utils.ApiResponse
-import top.lyuiowo.admin.common.utils.ApiUtils.Companion.executeAndRespond
+import top.lyuiowo.admin.common.utils.ApiManager
+import top.lyuiowo.admin.common.utils.ApiManager.Companion.executeAndRespond
 import java.util.UUID
 
 @RestController
@@ -19,9 +19,7 @@ class UserController(private val userService: UserService) {
     @GetMapping("/{userID}")
     fun getUserByUUID(
         @PathVariable userID: UUID
-    ): ApiResponse<List<User>> {
-//        val user = userService.findUserByID(userID)
-//        return ApiResponse(202, "请求成功", user);
+    ): ApiManager<List<User>> {
         return executeAndRespond {
             userService.findUserByID(userID);
         }
@@ -32,9 +30,7 @@ class UserController(private val userService: UserService) {
         @RequestParam username: String,
         @RequestParam email: String,
         @RequestParam password: String
-    ): ApiResponse<List<User>> {
-//        val newUser = userService.createUser(username, email, password);
-//        return ApiResponse(202, "添加成功", newUser);
+    ): ApiManager<List<User>> {
         return executeAndRespond {
             userService.createUser(username, email, password);
         }
@@ -44,9 +40,7 @@ class UserController(private val userService: UserService) {
     fun updateUsername(
         @RequestParam userID: UUID,
         @RequestParam username: String
-    ): ApiResponse<List<User>> {
-//        val newUsername = userService.updateUsername(userID, username);
-//        return ApiResponse(202, "修改成功", newUsername);
+    ): ApiManager<List<User>> {
         return executeAndRespond {
             userService.updateUsername(userID, username);
         }
@@ -56,9 +50,7 @@ class UserController(private val userService: UserService) {
     fun updateEmail(
         @RequestParam userID: UUID,
         @RequestParam email: String
-    ): ApiResponse<List<User>> {
-//        val newEmail = userService.updateEmail(userID, email);
-//        return ApiResponse(202, "修改成功", newEmail);
+    ): ApiManager<List<User>> {
         return executeAndRespond {
             userService.updateEmail(userID, email);
         }
@@ -67,9 +59,7 @@ class UserController(private val userService: UserService) {
     @PostMapping("/remove")
     fun removeUser(
         @RequestParam userID: UUID
-    ): ApiResponse<List<User>> {
-//        val removeUser = userService.removeUser(userID);
-//        return ApiResponse(202, "删除成功", removeUser);
+    ): ApiManager<List<User>> {
         return executeAndRespond {
             userService.removeUser(userID);
         }
@@ -78,9 +68,7 @@ class UserController(private val userService: UserService) {
     @PostMapping("/delete")
     fun deleteUser(
         @RequestParam userID: UUID
-    ): ApiResponse<List<Unit>> {
-//        val deleteUser = userService.deleteUser(userID);
-//        return ApiResponse(202, "删除成功", deleteUser);
+    ): ApiManager<List<Unit>> {
         return executeAndRespond {
             userService.deleteUser(userID);
         }

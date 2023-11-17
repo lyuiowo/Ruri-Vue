@@ -28,6 +28,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.0")
     implementation("org.springframework.security:spring-security-crypto:6.1.5")
     implementation("io.jsonwebtoken:jjwt:0.12.3")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
