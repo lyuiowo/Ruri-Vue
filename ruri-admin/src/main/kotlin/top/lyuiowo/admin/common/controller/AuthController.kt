@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import top.lyuiowo.admin.common.service.AuthService
 import top.lyuiowo.admin.common.utils.ApiManager
-import top.lyuiowo.admin.common.utils.ApiManager.Companion.executeAndRespond
 import top.lyuiowo.admin.common.utils.TokenManager
 import java.util.UUID
 
@@ -22,9 +21,7 @@ class AuthController(
         @RequestParam email: String,
         @RequestParam password: String
     ): ApiManager<List<Map<String, String>>> {
-        return executeAndRespond {
-            authService.login(email, password);
-        }
+        return authService.login(email, password);
     }
 
     @GetMapping("/testTokenGet")

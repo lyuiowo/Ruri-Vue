@@ -35,18 +35,24 @@ class TokenManager {
          * @return 用户的 UUID
          */
         fun extractUserIDFromToken(token: String): UUID? {
-            return try {
-                val claims: Claims = Jwts.parser()
+            val claims: Claims = try {
+                Jwts.parser()
                     .setSigningKey(Keys.hmacShaKeyFor(TOKEN_SECRET.toByteArray()))
                     .build()
                     .parseClaimsJws(token)
                     .body
-
-                val userID = claims["userID"] as String
-                UUID.fromString(userID)
             } catch (e: Exception) {
-                throw RuntimeException("用户不存在")
+                return UUID.randomUUID()
             }
+
+            val userID = claims["userID"] as String
+            val expiration = claims.expiration
+
+            if (expiration.before(Date())) {
+                return UUID.randomUUID()
+            }
+
+            return UUID.fromString(userID)
         }
 
         /**

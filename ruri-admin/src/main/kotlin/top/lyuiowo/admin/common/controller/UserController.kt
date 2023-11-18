@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController
 import top.lyuiowo.admin.common.model.User
 import top.lyuiowo.admin.common.service.UserService
 import top.lyuiowo.admin.common.utils.ApiManager
-import top.lyuiowo.admin.common.utils.ApiManager.Companion.executeAndRespond
 import java.util.UUID
 
 @RestController
@@ -20,9 +19,7 @@ class UserController(private val userService: UserService) {
     fun getUserByUUID(
         @PathVariable userID: UUID
     ): ApiManager<List<User>> {
-        return executeAndRespond {
-            userService.findUserByID(userID);
-        }
+        return userService.findUserByID(userID);
     }
 
     @PostMapping("/add")
@@ -31,9 +28,7 @@ class UserController(private val userService: UserService) {
         @RequestParam email: String,
         @RequestParam password: String
     ): ApiManager<List<User>> {
-        return executeAndRespond {
-            userService.createUser(username, email, password);
-        }
+        return userService.createUser(username, email, password);
     }
 
     @PostMapping("/updateUsername")
@@ -41,36 +36,28 @@ class UserController(private val userService: UserService) {
         @RequestParam userID: UUID,
         @RequestParam username: String
     ): ApiManager<List<User>> {
-        return executeAndRespond {
-            userService.updateUsername(userID, username);
-        }
+        return userService.updateUsername(userID, username);
     }
 
     @PostMapping("/updateEmail")
     fun updateEmail(
         @RequestParam userID: UUID,
         @RequestParam email: String
-    ): ApiManager<List<User>> {
-        return executeAndRespond {
-            userService.updateEmail(userID, email);
-        }
+    ): ApiManager<List<User>?> {
+        return userService.updateEmail(userID, email);
     }
 
     @PostMapping("/remove")
     fun removeUser(
         @RequestParam userID: UUID
-    ): ApiManager<List<User>> {
-        return executeAndRespond {
-            userService.removeUser(userID);
-        }
+    ): ApiManager<List<User>?> {
+        return userService.removeUser(userID);
     }
 
     @PostMapping("/delete")
     fun deleteUser(
         @RequestParam userID: UUID
-    ): ApiManager<List<Unit>> {
-        return executeAndRespond {
-            userService.deleteUser(userID);
-        }
+    ): ApiManager<List<Unit>?> {
+        return userService.deleteUser(userID);
     }
 }

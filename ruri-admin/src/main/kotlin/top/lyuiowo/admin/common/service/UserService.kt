@@ -3,27 +3,42 @@ package top.lyuiowo.admin.common.service
 import org.springframework.stereotype.Service
 import top.lyuiowo.admin.common.model.User
 import top.lyuiowo.admin.common.repository.UserRepository
+import top.lyuiowo.admin.common.utils.ApiManager
+import top.lyuiowo.admin.common.utils.ResultCode
 import java.sql.Timestamp
 import java.util.UUID
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(
+    private val userRepository: UserRepository
+) {
 
     /**
      * @param userID 用户的 UUID
      * @return 用户信息
      */
-    fun findUserByID(userID: UUID): List<User>? {
-//        return userRepository.findByUserID(userID);
+    fun findUserByID(userID: UUID): ApiManager<List<User>> {
         val existingUser = userRepository.findByUserID(userID);
         if (existingUser != null) {
-            if (existingUser.isDeleted) {
-                throw RuntimeException("用户不存在");
+            return if (existingUser.isDeleted) {
+                ApiManager(
+                    ResultCode.INVALID_USER.code,
+                    ResultCode.INVALID_USER.msg,
+                    emptyList()
+                );
             } else {
-                return listOf(existingUser);
+                ApiManager(
+                    ResultCode.SUCCESS.code,
+                    "查询成功",
+                    listOf(existingUser)
+                );
             }
         }
-        return emptyList()
+        return ApiManager(
+            ResultCode.INVALID_USER.code,
+            ResultCode.INVALID_USER.msg,
+            emptyList()
+        );
     }
 
     /**
@@ -32,13 +47,21 @@ class UserService(private val userRepository: UserRepository) {
      * @param password 密码
      * @return 用户保存信息
      */
-    fun createUser(username: String, email: String, password: String): List<User> {
+    fun createUser(username: String, email: String, password: String): ApiManager<List<User>> {
         val existingUserOfName = userRepository.findByUsername(username);
         val existingUserOfEmail = userRepository.findByEmail(email);
         if (existingUserOfName != null) {
-            throw RuntimeException("用户名已存在");
+            return ApiManager(
+                ResultCode.COMMON_FAIL.code,
+                "用户名已注册",
+                emptyList()
+            );
         } else if (existingUserOfEmail != null) {
-            throw RuntimeException("邮箱已存在");
+            return ApiManager(
+                ResultCode.COMMON_FAIL.code,
+                "邮箱已注册",
+                emptyList()
+            );
         }
 
         val userID = UUID.randomUUID();
@@ -51,7 +74,11 @@ class UserService(private val userRepository: UserRepository) {
             password = hashedPassword,
             createAt = currentTime,
             lastJoinAt = currentTime);
-        return listOf(userRepository.save(newUser));
+        return ApiManager(
+            ResultCode.SUCCESS.code,
+            "创建成功",
+            listOf(userRepository.save(newUser))
+        );
     }
 
     /**
@@ -59,18 +86,30 @@ class UserService(private val userRepository: UserRepository) {
      * @param newUsername 新用户名
      * @return
      */
-    fun updateUsername(userID: UUID, newUsername: String): List<User>? {
+    fun updateUsername(userID: UUID, newUsername: String): ApiManager<List<User>> {
         val existingUser = userRepository.findByUserID(userID);
 
         if (existingUser != null) {
             if (existingUser.isDeleted) {
-                throw RuntimeException("找不到用户");
+                return ApiManager(
+                    ResultCode.INVALID_USER.code,
+                    ResultCode.INVALID_USER.msg,
+                    emptyList()
+                );
             } else {
                 existingUser.username = newUsername;
-                return listOf(userRepository.save(existingUser));
+                return ApiManager(
+                    ResultCode.SUCCESS.code,
+                    "更新成功",
+                    listOf(userRepository.save(existingUser))
+                );
             }
         }
-        return emptyList();
+        return ApiManager(
+            ResultCode.INVALID_USER.code,
+            ResultCode.INVALID_USER.msg,
+            emptyList()
+        );
     }
 
     /**
@@ -78,18 +117,30 @@ class UserService(private val userRepository: UserRepository) {
      * @param newEmail 新邮箱地址
      * @return
      */
-    fun updateEmail(userID: UUID, newEmail: String): List<User>? {
+    fun updateEmail(userID: UUID, newEmail: String): ApiManager<List<User>?> {
         val existingUser = userRepository.findByUserID(userID);
 
         if (existingUser != null) {
-            if (existingUser.isDeleted) {
-                throw RuntimeException("用户不存在");
+            return if (existingUser.isDeleted) {
+                ApiManager(
+                    ResultCode.INVALID_USER.code,
+                    ResultCode.INVALID_USER.msg,
+                    emptyList()
+                );
             } else {
                 existingUser.email = newEmail;
-                return listOf(userRepository.save(existingUser));
+                ApiManager(
+                    ResultCode.SUCCESS.code,
+                    "更新成功",
+                    listOf(userRepository.save(existingUser))
+                );
             }
         }
-        return emptyList();
+        return ApiManager(
+            ResultCode.INVALID_USER.code,
+            ResultCode.INVALID_USER.msg,
+            emptyList()
+        );
     }
 
 
@@ -97,29 +148,48 @@ class UserService(private val userRepository: UserRepository) {
      * @param userID 用户的 UUID
      * @return
      */
-    fun removeUser(userID: UUID): List<User>? {
+    fun removeUser(userID: UUID): ApiManager<List<User>?> {
         val existingUser = userRepository.findByUserID(userID)
-            ?: throw RuntimeException("用户不存在");
+            ?: return ApiManager(
+                ResultCode.INVALID_USER.code,
+                ResultCode.INVALID_USER.msg,
+                emptyList()
+            );
 
         if (existingUser.isDeleted) {
-            return emptyList();
+            return ApiManager(
+                ResultCode.INVALID_USER.code,
+                ResultCode.INVALID_USER.msg,
+                emptyList()
+            );
         }
 
         existingUser.isDeleted = true;
-        return listOf(userRepository.save(existingUser));
+        return ApiManager(
+            ResultCode.SUCCESS.code,
+            "删除成功",
+            listOf(userRepository.save(existingUser)))
+        ;
     }
 
     /**
      * @param userID 用户 UUID
      * @return
      */
-    fun deleteUser(userID: UUID): List<Unit>? {
+    fun deleteUser(userID: UUID): ApiManager<List<Unit>?> {
         val existingUser = userRepository.findByUserID(userID);
 
-        if (existingUser == null) {
-            throw RuntimeException("用户不存在");
+        return if (existingUser == null) {
+            ApiManager(
+                ResultCode.INVALID_USER.code,
+                ResultCode.INVALID_USER.msg,
+                emptyList());
         } else {
-            return listOf(userRepository.delete(existingUser));
+            ApiManager(
+                ResultCode.SUCCESS.code,
+                "删除成功",
+                listOf(userRepository.delete(existingUser))
+            );
         }
     }
 }
