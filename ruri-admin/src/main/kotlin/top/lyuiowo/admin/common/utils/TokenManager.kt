@@ -9,8 +9,8 @@ import java.util.*
 class TokenManager {
 
     companion object {
-        private const val TOKEN_EXPIRATION_TIME = 86400000L; // 24小时
-        private const val TOKEN_SECRET = "m4oFGWdePZ8NguVfeWk5jpUPwL8JO_KXRtgG9OohW-0"; // 密钥
+        private const val TOKEN_EXPIRATION_TIME = 86400000L // 24小时
+        private const val TOKEN_SECRET = "m4oFGWdePZ8NguVfeWk5jpUPwL8JO_KXRtgG9OohW-0" // 密钥
 
 
         /**
@@ -24,7 +24,7 @@ class TokenManager {
 
             return Jwts.builder()
                 .claim("userID", userID.toString())
-                .setExpiration(expiryDate)
+                .expiration(expiryDate)
                 .signWith(key)
                 .compact()
         }
@@ -42,14 +42,14 @@ class TokenManager {
                     .parseClaimsJws(token)
                     .body
             } catch (e: Exception) {
-                return UUID.randomUUID()
+                return null
             }
 
             val userID = claims["userID"] as String
             val expiration = claims.expiration
 
             if (expiration.before(Date())) {
-                return UUID.randomUUID()
+                return null
             }
 
             return UUID.fromString(userID)

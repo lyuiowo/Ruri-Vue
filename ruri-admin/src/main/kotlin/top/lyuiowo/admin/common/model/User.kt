@@ -1,8 +1,6 @@
 package top.lyuiowo.admin.common.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
@@ -31,7 +29,7 @@ data class User(
          * @return 经过 hash 加密后的密码密文
          */
         fun hashPassword(password: String): String {
-            return BCrypt.hashpw(password, BCrypt.gensalt());
+            return BCrypt.hashpw(password, BCrypt.gensalt())
         }
     }
 
