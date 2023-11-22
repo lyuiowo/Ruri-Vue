@@ -1,10 +1,10 @@
-package top.lyuiowo.admin.common.service
+package top.lyuiowo.admin.service
 
 import org.springframework.stereotype.Service
-import top.lyuiowo.admin.common.repository.UserRepository
-import top.lyuiowo.admin.common.utils.ApiManager
-import top.lyuiowo.admin.common.utils.ResultCode
-import top.lyuiowo.admin.common.utils.TokenManager
+import top.lyuiowo.admin.repository.UserRepository
+import top.lyuiowo.admin.utils.ApiManager
+import top.lyuiowo.admin.utils.ResultCode
+import top.lyuiowo.admin.utils.TokenManager
 
 @Service
 class AuthService(private val userRepository: UserRepository) {

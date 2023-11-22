@@ -1,24 +1,23 @@
-package top.lyuiowo.admin.common.model
+package top.lyuiowo.admin.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
-import jakarta.persistence.Table
 import org.springframework.security.crypto.bcrypt.BCrypt
+import java.sql.Timestamp
 import java.util.UUID
 
 
 @Entity
-@Table(name = "users")
-data class User(
+data class User (
     @Id
     val userID: UUID,
     var username: String,
     var email: String,
     @get:JsonIgnore
     var password: String,
-    val createAt: java.sql.Timestamp,
-    var lastJoinAt: java.sql.Timestamp,
+    val createAt: Timestamp,
+    var lastJoinAt: Timestamp,
     @get:JsonIgnore
     var isDeleted: Boolean = false
 ) {

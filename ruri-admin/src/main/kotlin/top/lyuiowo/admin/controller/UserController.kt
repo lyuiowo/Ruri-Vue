@@ -1,14 +1,16 @@
-package top.lyuiowo.admin.common.controller
+package top.lyuiowo.admin.controller
 
 import org.springframework.web.bind.annotation.*
-import top.lyuiowo.admin.common.model.User
-import top.lyuiowo.admin.common.service.UserService
-import top.lyuiowo.admin.common.utils.ApiManager
+import top.lyuiowo.admin.model.User
+import top.lyuiowo.admin.service.UserService
+import top.lyuiowo.admin.utils.ApiManager
 import java.util.UUID
 
 @RestController
 @RequestMapping("api/user")
-class UserController(private val userService: UserService) {
+class UserController(
+    private val userService: UserService
+) {
 
     @GetMapping("/{userID}")
     fun getUserByUUID(

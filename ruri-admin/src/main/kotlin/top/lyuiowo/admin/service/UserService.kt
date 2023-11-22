@@ -1,15 +1,15 @@
-package top.lyuiowo.admin.common.service
+package top.lyuiowo.admin.service
 
 import org.springframework.stereotype.Service
-import top.lyuiowo.admin.common.model.User
-import top.lyuiowo.admin.common.repository.UserRepository
-import top.lyuiowo.admin.common.utils.ApiManager
-import top.lyuiowo.admin.common.utils.ResultCode
+import top.lyuiowo.admin.model.User
+import top.lyuiowo.admin.repository.UserRepository
+import top.lyuiowo.admin.utils.ApiManager
+import top.lyuiowo.admin.utils.ResultCode
 import java.sql.Timestamp
 import java.util.UUID
 
 @Service
-class UserService(
+class UserService (
     private val userRepository: UserRepository
 ) {
 

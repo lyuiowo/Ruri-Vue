@@ -1,4 +1,4 @@
-package top.lyuiowo.admin.common.utils
+package top.lyuiowo.admin.utils
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts

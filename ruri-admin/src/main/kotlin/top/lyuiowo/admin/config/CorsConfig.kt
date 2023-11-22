@@ -1,4 +1,4 @@
-package top.lyuiowo.admin.common.config
+package top.lyuiowo.admin.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

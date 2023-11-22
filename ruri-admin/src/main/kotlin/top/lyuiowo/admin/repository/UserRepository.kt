@@ -1,7 +1,7 @@
-package top.lyuiowo.admin.common.repository
+package top.lyuiowo.admin.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import top.lyuiowo.admin.common.model.User
+import top.lyuiowo.admin.model.User
 import java.util.UUID
 
 interface UserRepository: JpaRepository<User, UUID> {

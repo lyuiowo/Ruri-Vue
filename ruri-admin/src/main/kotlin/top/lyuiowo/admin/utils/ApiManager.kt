@@ -1,4 +1,4 @@
-package top.lyuiowo.admin.common.utils
+package top.lyuiowo.admin.utils
 
 data class ApiManager<T>(
     val code: Int,
