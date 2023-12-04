@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import top.lyuiowo.admin.model.Novel
 import top.lyuiowo.admin.service.NovelService
 import top.lyuiowo.admin.utils.ApiManager
+import top.lyuiowo.admin.utils.ResultCode
 
 @RestController
 @RequestMapping("api/novel")
@@ -20,16 +21,25 @@ class NovelController (
     }
 
     @GetMapping("/search")
-    fun getNovelByName(
-        @RequestParam novelName: String
+    fun getNovelByType(
+        @RequestParam q: String
     ): ApiManager<List<Novel>> {
-        return novelService.findNovelByName(novelName)
-    }
+        val bookWithName = novelService.findNovelByName(q).result
+        val bookWithAuthor = novelService.findNovelByAuthorName(q).result
+        var bookResult = mutableListOf<Novel>()
 
-    @GetMapping("/searchAuthor")
-    fun getNovelByAuthor(
-        @RequestParam authorName: String
-    ): ApiManager<List<Novel>> {
-        return novelService.findNovelByAuthorName(authorName)
+        bookWithName?.let { bookResult.addAll(it) }
+        bookWithAuthor?.let { bookResult.addAll(it) }
+
+        bookResult = bookResult
+            .distinctBy { it.novelID }
+            .sortedBy { it.novelID }
+            .toMutableList()
+
+        return ApiManager(
+            ResultCode.SUCCESS.code,
+            ResultCode.SUCCESS.msg,
+            bookResult
+        )
     }
 }

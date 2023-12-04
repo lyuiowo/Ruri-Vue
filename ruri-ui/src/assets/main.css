@@ -1,9 +1,1 @@
 @import './base.css';
-
-a,
-.green {
-  text-decoration: none;
-  color: #A5B8E1;
-  transition: 0.4s;
-}
-

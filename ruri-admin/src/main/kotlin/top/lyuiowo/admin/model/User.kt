@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import org.springframework.security.crypto.bcrypt.BCrypt
-import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -16,8 +16,8 @@ data class User (
     var email: String,
     @get:JsonIgnore
     var password: String,
-    val createAt: Timestamp,
-    var lastJoinAt: Timestamp,
+    val createAt: LocalDateTime,
+    var lastJoinAt: LocalDateTime,
     @get:JsonIgnore
     var isDeleted: Boolean = false
 ) {

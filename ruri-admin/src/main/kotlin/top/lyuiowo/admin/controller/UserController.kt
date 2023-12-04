@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.*
 import top.lyuiowo.admin.model.User
 import top.lyuiowo.admin.service.UserService
 import top.lyuiowo.admin.utils.ApiManager
+import top.lyuiowo.admin.utils.ResultCode
+import top.lyuiowo.admin.utils.TokenManager
 import java.util.UUID
 
 @RestController
@@ -56,5 +58,18 @@ class UserController(
         @RequestParam userID: UUID
     ): ApiManager<List<Unit>?> {
         return userService.deleteUser(userID)
+    }
+
+    @GetMapping("/searchUser")
+    fun searchUser(
+        @RequestParam token: String
+    ): ApiManager<List<User>> {
+        val userID = TokenManager.extractUserIDFromToken(token)
+            ?: return ApiManager(
+                ResultCode.INVALID_USER.code,
+                ResultCode.INVALID_USER.msg,
+                emptyList()
+            )
+        return userService.findUserByID(userID)
     }
 }

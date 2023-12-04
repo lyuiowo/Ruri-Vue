@@ -1,11 +1,15 @@
 <script>
 import axios from 'axios'
+import { Hide, View } from '@element-plus/icons-vue'
 
 export default {
+  components: { Hide, View },
+
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      canView: false
     }
   },
 
@@ -41,7 +45,9 @@ export default {
         .catch((error) => {
           console.error(error)
         })
-    }
+    },
+
+    changeView() {}
   }
 }
 </script>

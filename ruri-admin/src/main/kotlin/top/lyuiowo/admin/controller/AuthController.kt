@@ -18,7 +18,10 @@ class AuthController(
         @RequestParam email: String,
         @RequestParam password: String
     ): ApiManager<List<Map<String, String>>> {
-        return authService.login(email, password)
+        return authService.login(
+            email,
+            password
+        )
     }
 
     @PostMapping("/register")
@@ -26,7 +29,11 @@ class AuthController(
         @RequestParam username: String,
         @RequestParam email: String,
         @RequestParam password: String
-    ): ApiManager<List<User>> {
-        return userService.createUser(username, email, password)
+    ): ApiManager<Map<String, String>> {
+        return authService.register(
+            username,
+            email,
+            password
+        )
     }
 }

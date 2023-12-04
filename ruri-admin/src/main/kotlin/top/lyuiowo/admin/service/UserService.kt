@@ -6,6 +6,7 @@ import top.lyuiowo.admin.repository.UserRepository
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.ResultCode
 import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -66,7 +67,7 @@ class UserService (
 
         val userID = UUID.randomUUID()
         val hashedPassword = User.hashPassword(password)
-        val currentTime = Timestamp(System.currentTimeMillis())
+        val currentTime = LocalDateTime.now()
         val newUser = User(
             userID = userID,
             username = username,
