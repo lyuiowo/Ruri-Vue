@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Transient
 import java.sql.Timestamp
+import java.util.UUID
 
 @Entity
 data class Novel (

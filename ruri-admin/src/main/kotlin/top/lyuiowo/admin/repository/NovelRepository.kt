@@ -14,5 +14,4 @@ interface NovelRepository : JpaRepository<Novel, String> {
 
     @Query("select n from Novel n join n.author a where a.username like %:username%")
     fun findByAuthorUsername(username: String): List<Novel>?
-
 }

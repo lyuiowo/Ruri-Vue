@@ -40,7 +40,8 @@
     </template>
   </el-dialog>
 
-  <BookManage v-model="showBookManageDialog"/>
+  <BookManage v-model="showBookManageDialog" />
+  <IdeaManage v-model="showIdeaManageDialog" />
 </template>
 
 <script>
@@ -66,7 +67,7 @@ export default {
       isLogin: true,
 
       showBookManageDialog: false,
-      showTagManageDialog: false,
+      showIdeaManageDialog: false,
     }
   },
 
@@ -81,8 +82,8 @@ export default {
     eventBus.on('showBookManage', () => {
       this.showBookManageDialog = true
     });
-    eventBus.on('showTagManage', () => {
-      this.showTagManageDialog = true
+    eventBus.on('showIdeaManage', () => {
+      this.showIdeaManageDialog = true
     });
     eventBus.on('showLogin', () => {
       this.showLoginDialog = true
@@ -109,12 +110,14 @@ export default {
           }
         }
       ).then((response) => {
-        console.log(response.data)
+        // console.log(response.data)
         if (response.data.code === 200) {
           let token = response.data.result[0].token
 
           this.store.updateToken(token)
           localStorage.setItem('token', token)
+
+          this.store.isAuth = true
 
           ElNotification({
             title: '欢迎回来',
@@ -130,7 +133,7 @@ export default {
           throw new Error(response.data.msg)
         }
       }).catch((error) => {
-        console.log(error)
+        // console.log(error)
         ElNotification({
           title: '登陆失败',
           message: error.message,
@@ -151,7 +154,7 @@ export default {
             }
           }
       ).then((response) => {
-        console.log(response.data)
+        // console.log(response.data)
         if (response.data.code === 200) {
           let token = response.data.result.token
 
@@ -172,7 +175,7 @@ export default {
           throw new Error(response.data.msg)
         }
       }).catch((error) => {
-        console.log(error)
+        // console.log(error)
         ElNotification({
           title: '注册失败',
           message: error.message,
@@ -200,10 +203,10 @@ export default {
               }
             }
         ).then((response) => {
-          console.log(response.data)
+          // console.log(response.data)
 
           this.store.userInfo = response.data.result[0]
-          console.log(this.store.userInfo)
+          // console.log(this.store.userInfo)
 
         }).catch((error) => {
           ElMessage.error('请登录后使用')

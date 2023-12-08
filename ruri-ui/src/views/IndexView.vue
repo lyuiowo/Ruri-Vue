@@ -12,14 +12,14 @@
           <el-input size="small" placeholder="搜索书籍" class="search-input" v-model="search" @keyup.enter.native="searchBook()">
             <template #prefix>
               <el-icon class="el-input__icon">
-                <Search />
+                <Search/>
               </el-icon>
             </template>
           </el-input>
         </div>
         <div class="user-wrapper">
           <div class="user-title">
-            用户空间
+            {{ store.isAuth ? store.userInfo.username : '请登录后操作' }}
             <span class="right-text" v-if="store.userInfo.username" @click="logout">
               注销
             </span>
@@ -27,17 +27,22 @@
               登录
             </span>
           </div>
+          <div class="user-item">
+            <el-tag type="info" class="tag-btn" effect="dark" size="large">
+              管理用户
+            </el-tag>
+          </div>
         </div>
         <div class="writing-wrapper">
           <div class="writing-title">
             创作中心
           </div>
           <div class="writing-item">
-            <el-tag effect="dark" class="writing-btn" type="info" size="large" @click="showBookManage">
+            <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showBookManage">
               小说管理
             </el-tag>
-            <el-tag effect="dark" class="writing-btn" type="info" size="large" @click="showTagManage">
-              标签管理
+            <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showIdeaManage">
+              灵感管理
             </el-tag>
           </div>
         </div>
@@ -51,25 +56,30 @@
           书架
         </div>
       </div>
+      <div class="books-wrapper">
+        <el-empty v-if="!store.bookList.length" description="创建我的小说">
+          <el-button type="primary">创建小说</el-button>
+        </el-empty>
+
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Search, Menu } from '@element-plus/icons-vue';
-import { useStore } from '@/stores/pinia';
-import { ElNotification, ElMessage } from "element-plus";
+import {Search, Menu} from '@element-plus/icons-vue';
+import {useStore} from '@/stores/pinia';
+import {ElNotification, ElMessage} from "element-plus";
 import axios from "axios";
 import eventBus from '@/plugins/eventBus';
 
 export default {
   name: "Index",
 
-  components: { Search, Menu },
+  components: {Search, Menu},
 
   data() {
     return {
-      store: null,
       search: "",
 
       isSearchResult: false,
@@ -78,6 +88,8 @@ export default {
       searchResult: [],
     }
   },
+
+  computed: {},
 
   setup() {
     const store = useStore()
@@ -91,8 +103,8 @@ export default {
       eventBus.emit('showBookManage')
     },
 
-    showTagManage() {
-      eventBus.emit('showTagManage')
+    showIdeaManage() {
+      eventBus.emit('showIdeaManage')
     },
 
     login() {
@@ -100,7 +112,7 @@ export default {
     },
 
     logout() {
-      this.store.userInfo = { }
+      this.store.userInfo = {}
       this.store.token = ''
       ElNotification.info({
         title: "退出成功",
@@ -121,10 +133,10 @@ export default {
             }
           }
       ).then((response) => {
-        console.log(response.data)
+        // console.log(response.data)
 
       }).catch((error) => {
-        console.log(error)
+        // console.log(error)
       })
     },
 
@@ -194,10 +206,14 @@ export default {
       .right-text {
         float: right;
         display: inline-block;
-        height: 20px;
-        line-height: 20px;
+        height: 22px;
+        line-height: 22px;
         cursor: pointer;
         user-select: none;
+      }
+
+      .user-item {
+        padding-top: 16px;
       }
     }
 
@@ -212,12 +228,12 @@ export default {
       .writing-item {
         padding-top: 16px;
       }
+    }
 
-      .writing-btn {
-        margin-right: 15px;
-        margin-bottom: 15px;
-        cursor: pointer;
-      }
+    .tag-btn {
+      margin-right: 15px;
+      margin-bottom: 15px;
+      cursor: pointer;
     }
   }
 
@@ -247,6 +263,12 @@ export default {
         user-select: none;
         margin-left: 10px;
       }
+    }
+
+    .books-wrapper {
+      flex: 1;
+      overflow-x: hidden;
+      overflow-y: scroll;
     }
   }
 }
