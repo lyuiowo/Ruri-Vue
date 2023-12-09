@@ -56,6 +56,21 @@ class NovelService(
     }
 
     /**
+     * @param
+     */
+    fun findNovelByID(novelID: Int): ApiManager<Novel> {
+        val existingNovel = novelRepository.findNovelByNovelID(novelID)
+        if (existingNovel != null) {
+            return ApiManager(ResultCode.SUCCESS.code, "查询图书成功", existingNovel)
+        }
+        return ApiManager(
+            ResultCode.COMMON_FAIL.code,
+            "查询失败",
+            null
+        )
+    }
+
+    /**
      * 根据关键字搜索全部相关小说
      * @param value 搜索值
      * @return 搜索结果

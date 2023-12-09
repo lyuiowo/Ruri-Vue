@@ -5,11 +5,13 @@ import top.lyuiowo.admin.model.Chapter
 import top.lyuiowo.admin.repository.ChapterRepository
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.ResultCode
+import top.lyuiowo.admin.utils.TokenManager
 import java.util.*
 
 @Service
 class ChapterService(
-    private val chapterRepository: ChapterRepository
+    private val chapterRepository: ChapterRepository,
+    private val novelService: NovelService
 ) {
     /**
      * 搜索对应章节信息
@@ -69,14 +71,18 @@ class ChapterService(
      * @param chapterID 章节 ID
      * @return 删除结果
      */
-    fun deleteChapter(chapterID: Int): ApiManager<List<Chapter>> {
+    fun deleteChapter(chapterID: Int, token: String): ApiManager<List<Chapter>> {
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
         val chapter = chapterRepository.findByChapterID(chapterID)
         if (chapter != null && !chapter.isDeleted) {
-            chapter.isDeleted = true
-            val deleteChapter = chapterRepository.save(chapter)
-            return ApiManager(
-                ResultCode.SUCCESS.code, "删除成功", listOf(deleteChapter)
-            )
+            val author = novelService.findNovelByID(chapter.novelID).result?.author?.userID
+            if (author != null && author == userID) {
+                chapter.isDeleted = true
+                val deleteChapter = chapterRepository.save(chapter)
+                return ApiManager(
+                    ResultCode.SUCCESS.code, "删除成功", listOf(deleteChapter)
+                )
+            }
         }
         return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
     }

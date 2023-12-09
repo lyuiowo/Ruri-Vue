@@ -21,7 +21,7 @@ class ChapterController(
     private val loggerManager = LoggerManager
 
     @GetMapping("/search")
-    fun search(
+    fun searchChapter(
         request: HttpServletRequest,
         @RequestParam id: Int,
         @RequestParam key: Int
@@ -37,13 +37,25 @@ class ChapterController(
     }
 
     @PostMapping("/update")
-    fun update(
+    fun updateChapter(
         request: HttpServletRequest,
         @RequestParam id: Int,
         @RequestParam title: String,
         @RequestParam content: String
     ): ApiManager<List<Chapter>?> {
         val existingChapter = chapterService.updateChapter(id, title, content)
+        loggerManager.getLogger(request, existingChapter.code)
+
+        return existingChapter
+    }
+
+    @PostMapping("/delete")
+    fun deleteChapter(
+        request: HttpServletRequest,
+        @RequestParam id: Int,
+        @RequestParam token: String
+    ): ApiManager<List<Chapter>> {
+        val existingChapter = chapterService.deleteChapter(id, token)
         loggerManager.getLogger(request, existingChapter.code)
 
         return existingChapter
