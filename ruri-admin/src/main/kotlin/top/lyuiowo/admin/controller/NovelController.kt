@@ -79,4 +79,16 @@ class NovelController (
 
         return existingNovel
     }
+
+    @PostMapping("/remove")
+    fun removeNovel(
+        request: HttpServletRequest,
+        @RequestParam id: Int,
+        @RequestParam token: String
+    ): ApiManager<List<Novel>?> {
+        val existingNovel = novelService.removeNovel(id, token)
+        loggerManager.getLogger(request, existingNovel.code)
+
+        return existingNovel
+    }
 }

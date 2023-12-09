@@ -9,7 +9,8 @@
           清风不识字，何故乱翻书
         </div>
         <div class="search-wrapper">
-          <el-input size="small" placeholder="搜索书籍" class="search-input" v-model="search" @keyup.enter.native="searchBook()">
+          <el-input size="small" placeholder="搜索书籍" class="search-input" v-model="search"
+                    @keyup.enter.native="searchBook()">
             <template #prefix>
               <el-icon class="el-input__icon">
                 <Search/>
@@ -85,7 +86,7 @@ import moment from "moment/moment";
 export default {
   name: "Index",
 
-  components: { Search, Menu },
+  components: {Search, Menu},
 
   data() {
     return {
@@ -95,7 +96,7 @@ export default {
       isSearchResult: false,
       isExploreResult: false,
 
-      searchResult: [ ],
+      searchResult: [],
     }
   },
 
@@ -105,7 +106,7 @@ export default {
     },
 
     showShelfBooks() {
-        return this.store.bookList;
+      return this.store.bookList;
     }
   },
 
@@ -131,7 +132,7 @@ export default {
     },
 
     logout() {
-      this.store.userInfo = { }
+      this.store.userInfo = {}
       this.store.token = ''
       ElNotification.info({
         title: "退出成功",

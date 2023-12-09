@@ -11,6 +11,8 @@ import top.lyuiowo.admin.service.ChapterService
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.LoggerManager
 import top.lyuiowo.admin.utils.ResultCode
+import top.lyuiowo.admin.utils.TokenManager
+import java.util.UUID
 
 @RestController
 @RequestMapping("api/chapter")
@@ -31,6 +33,20 @@ class ChapterController(
             2 -> chapterService.getInfoByNovelID(id)
             else -> ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
         }
+        loggerManager.getLogger(request, existingChapter.code)
+
+        return existingChapter
+    }
+
+    @PostMapping("/create")
+    fun createChapter(
+        request: HttpServletRequest,
+        @RequestParam id: Int,
+        @RequestParam title: String,
+        @RequestParam content: String,
+        @RequestParam token: String
+    ): ApiManager<List<Chapter>> {
+        val existingChapter = chapterService.createChapter(id, title, content, token)
         loggerManager.getLogger(request, existingChapter.code)
 
         return existingChapter

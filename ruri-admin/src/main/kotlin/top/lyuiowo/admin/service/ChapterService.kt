@@ -3,16 +3,19 @@ package top.lyuiowo.admin.service
 import org.springframework.stereotype.Service
 import top.lyuiowo.admin.model.Chapter
 import top.lyuiowo.admin.repository.ChapterRepository
+import top.lyuiowo.admin.repository.NovelRepository
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.ResultCode
 import top.lyuiowo.admin.utils.TokenManager
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
 class ChapterService(
     private val chapterRepository: ChapterRepository,
-    private val novelService: NovelService
+    private val novelRepository: NovelRepository
 ) {
+
     /**
      * 搜索对应章节信息
      * @param chapterID 章节 ID
@@ -46,6 +49,26 @@ class ChapterService(
         )
     }
 
+    fun createChapter(novelID: Int, title: String, content: String, token: String): ApiManager<List<Chapter>> {
+        val userID = TokenManager.extractUserIDFromToken(token)
+        val existingNovel = novelRepository.findNovelByNovelID(novelID)
+        val currentTime = LocalDateTime.now()
+        if (userID != null && existingNovel != null) {
+            val newChapter = Chapter(
+                novelID = novelID,
+                title = title,
+                content = content,
+                createAt = currentTime,
+                status = 1,
+                isDeleted = false
+            )
+
+            return ApiManager(ResultCode.SUCCESS.code, "创建成功", listOf(chapterRepository.save(newChapter)))
+        }
+
+        return ApiManager(ResultCode.INVALID_USER.code, ResultCode.INVALID_USER.msg, emptyList())
+    }
+
     /**
      * 更新章节信息
      * @param chapter 章节对象
@@ -67,7 +90,7 @@ class ChapterService(
     }
 
     /**
-     * 删除章节内容
+     * 删除章节内容 - 逻辑删除
      * @param chapterID 章节 ID
      * @return 删除结果
      */
@@ -75,8 +98,8 @@ class ChapterService(
         val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
         val chapter = chapterRepository.findByChapterID(chapterID)
         if (chapter != null && !chapter.isDeleted) {
-            val author = novelService.findNovelByID(chapter.novelID).result?.author?.userID
-            if (author != null && author == userID) {
+            val author = novelRepository.findNovelByNovelID(chapter.novelID)?.author?.userID
+            if (author == userID) {
                 chapter.isDeleted = true
                 val deleteChapter = chapterRepository.save(chapter)
                 return ApiManager(
@@ -85,5 +108,18 @@ class ChapterService(
             }
         }
         return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
+    }
+
+    fun removeChapter(chapterID: Int, token: String): ApiManager<List<Chapter>> {
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val chapter = chapterRepository.findByChapterID(chapterID)
+        if (chapter != null) {
+            val author = novelRepository.findNovelByNovelID(chapter.novelID)?.author?.userID
+            if (author != null && author == userID) {
+                chapterRepository.delete(chapter)
+                return ApiManager(ResultCode.SUCCESS.code, "删除成功", emptyList())
+            }
+        }
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
     }
 }

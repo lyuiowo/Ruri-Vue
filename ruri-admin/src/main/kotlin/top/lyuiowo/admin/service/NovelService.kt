@@ -2,8 +2,9 @@ package top.lyuiowo.admin.service
 
 import org.springframework.stereotype.Service
 import top.lyuiowo.admin.model.Novel
-import top.lyuiowo.admin.model.User
+import top.lyuiowo.admin.repository.ChapterRepository
 import top.lyuiowo.admin.repository.NovelRepository
+import top.lyuiowo.admin.repository.UserRepository
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.ResultCode
 import top.lyuiowo.admin.utils.TokenManager
@@ -13,7 +14,8 @@ import java.util.UUID
 @Service
 class NovelService(
     private val novelRepository: NovelRepository,
-    private val userService: UserService
+    private val chapterRepository: ChapterRepository,
+    private val userRepository: UserRepository
 ) {
     /**
      * @param novelName 小说名字
@@ -102,12 +104,8 @@ class NovelService(
      */
     fun findMyShelf(token: String): ApiManager<List<Novel>> {
         val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
-        val username = userService.findUserByID(userID).result?.get(0)?.username
-        val novelList = if (username != null) {
-            findNovelByAuthorName(username).result!!
-        } else {
-            emptyList()
-        }
+        val username = userRepository.findByUserID(userID)?.username
+        val novelList = username?.let { findNovelByAuthorName(it).result }!!
 
         return ApiManager(
             ResultCode.SUCCESS.code,
@@ -125,7 +123,7 @@ class NovelService(
      */
     fun createNovel(novelName: String, novelDesc: String, token: String): ApiManager<List<Novel>?> {
         val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
-        val author = userService.findUserByID(userID).result?.get(0)
+        val author = userRepository.findByUserID(userID)
         val currentTime = LocalDateTime.now()
         return if (author != null) {
             val newNovel = Novel(
@@ -166,7 +164,7 @@ class NovelService(
             }
         }
 
-        return ApiManager(ResultCode.SUCCESS.code, "更新失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "更新失败", emptyList())
     }
 
     /**
@@ -191,6 +189,26 @@ class NovelService(
             }
         }
 
-        return ApiManager(ResultCode.SUCCESS.code, "删除失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
+    }
+
+    fun removeNovel(novelID: Int, token: String): ApiManager<List<Novel>?> {
+        val existingNovel = novelRepository.findNovelByNovelID(novelID)
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+
+        if (existingNovel != null) {
+            if (existingNovel.author.userID == userID) {
+
+                chapterRepository.findByNovelID(novelID)?.forEach { chapter ->
+                    if (chapter != null) {
+                        chapterRepository.delete(chapter)
+                    }
+                }
+
+                novelRepository.delete(existingNovel)
+                return ApiManager(ResultCode.SUCCESS.code, "删除成功", emptyList())
+            }
+        }
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
     }
 }

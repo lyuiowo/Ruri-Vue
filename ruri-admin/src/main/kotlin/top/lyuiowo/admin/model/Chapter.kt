@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 @Entity
 data class Chapter(
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val chapterID: Int? = null,
     val novelID: Int,
     var title: String,
