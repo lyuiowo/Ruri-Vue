@@ -60,16 +60,16 @@ class AuthService(
     fun register(username: String, email: String, password: String): ApiManager<Map<String, String>> {
         val user = userService.createUser(username, email, password);
         var userID: UUID? = null
-        if (user.code == 200 && user.result?.isNotEmpty() == true) {
+        return if (user.code == 200 && user.result?.isNotEmpty() == true) {
             userID = user.result[0].userID;
             val token = TokenManager.generateToken(userID)
-            return ApiManager(
+            ApiManager(
                 ResultCode.SUCCESS.code,
                 "注册成功",
                 mapOf("token" to token)
             )
         } else {
-            return ApiManager(
+            ApiManager(
                 user.code,
                 user.msg,
                 emptyMap()

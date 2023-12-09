@@ -19,7 +19,7 @@
         </div>
         <div class="user-wrapper">
           <div class="user-title">
-            {{ store.isAuth ? store.userInfo.username : '请登录后操作' }}
+            {{ store.isAuth ? "用户空间" : '请登录后操作' }}
             <span class="right-text" v-if="store.userInfo.username" @click="logout">
               注销
             </span>
@@ -28,8 +28,8 @@
             </span>
           </div>
           <div class="user-item">
-            <el-tag type="info" class="tag-btn" effect="dark" size="large">
-              管理用户
+            <el-tag type="info" class="tag-btn" effect="dark" size="large" @click="showUserManage">
+              作者信息
             </el-tag>
           </div>
         </div>
@@ -41,9 +41,6 @@
             <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showBookManage">
               小说管理
             </el-tag>
-            <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showIdeaManage">
-              灵感管理
-            </el-tag>
           </div>
         </div>
       </div>
@@ -51,16 +48,27 @@
     <div class="shelf-wrapper">
       <div class="shelf-title">
         {{ isSearchResult ? "搜索" : "书架" }}
-        ({{ searchResult.length }})
+        ({{ isSearchResult ? searchResult.length : bookList.length }})
         <div class="title-btn" v-if="isSearchResult" @click="backToShelf">
           书架
         </div>
       </div>
-      <div class="books-wrapper">
-        <el-empty v-if="!store.bookList.length" description="创建我的小说">
-          <el-button type="primary">创建小说</el-button>
-        </el-empty>
-
+      <div class="books-wrapper" ref="bookList">
+        <div class="wrapper">
+          <el-empty v-if="!store.bookList.length" description="创建我的小说">
+            <el-button type="primary">创建小说</el-button>
+          </el-empty>
+          <div class="book" v-for="book in bookList" :key="book.novelID">
+            <div class="book-info">
+              <div class="name">
+                {{ book.name }}
+              </div>
+              <div class="sub">
+                {{ book.totalChapterNum }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -72,24 +80,34 @@ import {useStore} from '@/stores/pinia';
 import {ElNotification, ElMessage} from "element-plus";
 import axios from "axios";
 import eventBus from '@/plugins/eventBus';
+import moment from "moment/moment";
 
 export default {
   name: "Index",
 
-  components: {Search, Menu},
+  components: { Search, Menu },
 
   data() {
     return {
+      username: "",
       search: "",
 
       isSearchResult: false,
       isExploreResult: false,
 
-      searchResult: [],
+      searchResult: [ ],
     }
   },
 
-  computed: {},
+  computed: {
+    bookList() {
+      return this.isSearchResult ? this.searchResult : this.showShelfBooks;
+    },
+
+    showShelfBooks() {
+        return this.store.bookList;
+    }
+  },
 
   setup() {
     const store = useStore()
@@ -100,11 +118,12 @@ export default {
 
   methods: {
     showBookManage() {
+      this.searchMyBook()
       eventBus.emit('showBookManage')
     },
 
-    showIdeaManage() {
-      eventBus.emit('showIdeaManage')
+    showUserManage() {
+      eventBus.emit('showUserManage')
     },
 
     login() {
@@ -112,11 +131,37 @@ export default {
     },
 
     logout() {
-      this.store.userInfo = {}
+      this.store.userInfo = { }
       this.store.token = ''
       ElNotification.info({
         title: "退出成功",
         message: "期待下次再来"
+      })
+    },
+
+    searchMyBook() {
+      axios.get(
+          'http://localhost:8080/api/novel/searchMyShelf',
+          {
+            params: {
+              token: this.store.token
+            }
+          }
+      ).then((response) => {
+        // console.log(response.data)
+
+        response.data.result.forEach((item) => {
+          const updateAt = moment(item.updateAt).format('YYYY/MM/DD H:mm:ss')
+          const createAt = moment(item.createAt).format('YYYY/MM/DD H:mm:ss')
+
+          item.updateAt = updateAt
+          item.createAt = createAt
+        })
+
+        this.store.updateBookList(response.data.result)
+
+      }).catch((error) => {
+
       })
     },
 
@@ -129,14 +174,17 @@ export default {
           "http://localhost:8080/api/novel/search",
           {
             params: {
-              key: this.search
+              q: this.search
             }
           }
       ).then((response) => {
-        // console.log(response.data)
+        console.log(response.data)
+        this.searchResult = response.data.result
+
+        this.isSearchResult = true
 
       }).catch((error) => {
-        // console.log(error)
+        console.log(error)
       })
     },
 
@@ -231,6 +279,7 @@ export default {
     }
 
     .tag-btn {
+      width: 100%;
       margin-right: 15px;
       margin-bottom: 15px;
       cursor: pointer;

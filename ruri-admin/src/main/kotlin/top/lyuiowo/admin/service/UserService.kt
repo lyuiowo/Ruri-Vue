@@ -5,7 +5,6 @@ import top.lyuiowo.admin.model.User
 import top.lyuiowo.admin.repository.UserRepository
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.ResultCode
-import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -13,15 +12,16 @@ import java.util.UUID
 class UserService (
     private val userRepository: UserRepository
 ) {
-
     /**
      * @param userID 用户的 UUID
      * @return 用户信息
      */
     fun findUserByID(userID: UUID): ApiManager<List<User>> {
         val existingUser = userRepository.findByUserID(userID)
+
         if (existingUser != null) {
             return if (existingUser.isDeleted) {
+
                 ApiManager(
                     ResultCode.INVALID_USER.code,
                     ResultCode.INVALID_USER.msg,
@@ -36,8 +36,8 @@ class UserService (
             }
         }
         return ApiManager(
-            ResultCode.INVALID_USER.code,
-            ResultCode.INVALID_USER.msg,
+            ResultCode.COMMON_FAIL.code,
+            ResultCode.COMMON_FAIL.msg,
             emptyList()
         )
     }
@@ -81,29 +81,6 @@ class UserService (
             listOf(userRepository.save(newUser))
         )
     }
-
-    /**
-     * @param userID 用户的 UUID
-     * @param newUsername 新用户名
-     * @return
-     */
-    fun updateUsername(userID: UUID, newUsername: String): ApiManager<List<User>> {
-        val existingUser = userRepository.findByUserID(userID)
-
-        return updateUser(existingUser, newUsername)
-    }
-
-    /**
-     * @param userID 用户的 UUID
-     * @param newEmail 新邮箱地址
-     * @return
-     */
-    fun updateEmail(userID: UUID, newEmail: String): ApiManager<List<User>> {
-        val existingUser = userRepository.findByUserID(userID)
-
-        return updateUser(existingUser, newEmail)
-    }
-
 
     /**
      * @param userID 用户的 UUID
@@ -157,7 +134,8 @@ class UserService (
     /**
      * 更新
      */
-    fun updateUser(user: User?, newValue: String): ApiManager<List<User>> {
+    fun updateUser(userID: UUID, username: String, email: String): ApiManager<List<User>> {
+        val user = userRepository.findByUserID(userID)
         if (user != null) {
             return if (user.isDeleted) {
                 ApiManager(
@@ -166,7 +144,8 @@ class UserService (
                     emptyList()
                 )
             } else {
-                user.username = newValue
+                user.username = username
+                user.email = email
                 ApiManager(
                     ResultCode.SUCCESS.code,
                     "更新成功",

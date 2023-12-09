@@ -41,7 +41,7 @@
   </el-dialog>
 
   <BookManage v-model="showBookManageDialog" />
-  <IdeaManage v-model="showIdeaManageDialog" />
+  <UserManage v-model="showUserManageDialog" />
 </template>
 
 <script>
@@ -50,10 +50,11 @@ import { ElMessage, ElNotification } from "element-plus";
 import { useStore } from './stores/pinia';
 import eventBus from './plugins/eventBus';
 import BookManage from "@/components/BookManage.vue";
+import UserManage from '@/components/UserManage.vue';
 
 export default {
   name: "App",
-  components: { BookManage },
+  components: { BookManage, UserManage },
 
   data() {
     return {
@@ -67,7 +68,7 @@ export default {
       isLogin: true,
 
       showBookManageDialog: false,
-      showIdeaManageDialog: false,
+      showUserManageDialog: false,
     }
   },
 
@@ -82,12 +83,18 @@ export default {
     eventBus.on('showBookManage', () => {
       this.showBookManageDialog = true
     });
-    eventBus.on('showIdeaManage', () => {
-      this.showIdeaManageDialog = true
+
+    eventBus.on('showUserManage', () => {
+      this.showUserManageDialog = true
     });
+
+    eventBus.on('closeUserManage', () => {
+      this.showUserManageDialog = false
+    })
+
     eventBus.on('showLogin', () => {
       this.showLoginDialog = true
-    })
+    });
   },
 
   methods: {
@@ -125,9 +132,9 @@ export default {
             type: 'success',
           })
 
-          this.showLoginDialog = false
-
           this.searchUserInfo()
+
+          this.showLoginDialog = false
 
         } else {
           throw new Error(response.data.msg)
@@ -203,17 +210,17 @@ export default {
               }
             }
         ).then((response) => {
-          // console.log(response.data)
-
-          this.store.userInfo = response.data.result[0]
-          // console.log(this.store.userInfo)
+          console.log(response.data)
+          const userInfo = response.data.result[0]
+          this.store.updateUserInfo(userInfo)
+          console.log(this.store.userInfo)
 
         }).catch((error) => {
           ElMessage.error('请登录后使用')
-          this.showLoginDialog = true
+          this.login()
         })
       }
-    }
+    },
   }
 }
 </script>

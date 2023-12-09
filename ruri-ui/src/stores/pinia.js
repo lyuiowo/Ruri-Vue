@@ -14,8 +14,15 @@ export const useStore = defineStore('store', {
         updateToken(token) {
             this.token = token;
         },
-        updateUserNS(val) {
-            this.userNS = val;
+        updateBookList(list) {
+            this.bookList = list;
+        },
+        updateUserInfo(user) {
+            this.userInfo = {
+                userID: user.userID,
+                username: user.username,
+                email: user.email
+            }
         }
     },
 })

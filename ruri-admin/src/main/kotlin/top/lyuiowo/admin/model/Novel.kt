@@ -2,24 +2,22 @@ package top.lyuiowo.admin.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Transient
+import jakarta.persistence.*
 import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Entity
 data class Novel (
     @Id
-    val novelID: String,
-    val name: String,
-    val description: String,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val novelID: Int ?= null,
+    var name: String,
+    var description: String,
     @ManyToOne @JoinColumn(name = "authorID") @get:JsonIgnore
     val author: User,
-    val createAt: Timestamp,
-    var updateAt: Timestamp,
+    val createAt: LocalDateTime,
+    var updateAt: LocalDateTime,
     @get:JsonIgnore
     var isHidden: Boolean = false,
 ) {

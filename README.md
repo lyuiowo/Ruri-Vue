@@ -1,2 +1,2 @@
 # Ruri-Vue
-基于 SpringBoot + Vue 前后端分离的游戏交流网站
+基于 SpringBoot + Vue 前后端分离的小说创作平台

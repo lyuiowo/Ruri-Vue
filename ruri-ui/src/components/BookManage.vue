@@ -12,7 +12,7 @@
     </template>
 
     <div class="source-container table-container">
-      <el-table :data="bookList" style="width: 100%">
+      <el-table :data="bookList" style="width: 100%" empty-text="没有数据">
         <el-table-column type="selection" width="30px" :selectable="isBookSelectable" />
         <el-table-column property="name" label="书名" min-width="100" sortable />
         <el-table-column property="updateAt" label="更新时间" sortable>
@@ -57,7 +57,6 @@ export default {
 
   data() {
     return {
-      showBookManage: false,
       bookList: [ ]
     }
   },
@@ -70,38 +69,13 @@ export default {
   },
 
   created() {
-    this.searchMyBook(this.store.token)
+    this.bookList = this.store.bookList
   },
 
   methods: {
     isBookSelectable() {
       return true;
     },
-
-    searchMyBook() {
-      axios.get(
-          'http://localhost:8080/api/novel/searchMyShelf',
-          {
-            params: {
-              token: this.store.token
-            }
-          }
-      ).then((response) => {
-        // console.log(response.data)
-
-        response.data.result.forEach((item) => {
-          const updateAt = moment(item.updateAt).format('YYYY/MM/DD H:mm:ss')
-          const createAt = moment(item.createAt).format('YYYY/MM/DD H:mm:ss')
-
-          item.updateAt = updateAt
-          item.createAt = createAt
-        })
-
-        this.bookList = response.data.result
-      }).catch((error) => {
-
-      })
-    }
   }
 }
 </script>
