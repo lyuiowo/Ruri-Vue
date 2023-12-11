@@ -8,7 +8,7 @@ create table user (
     password varchar(100) not null ,
     create_at timestamp ,
     last_join_at timestamp ,
-    is_deleted boolean default false
+    is_deleted boolean not null default false
 );
 
 -- 小说表
@@ -19,9 +19,27 @@ create table novel (
     authorID UUID not null,
     create_at timestamp ,
     update_at timestamp ,
-    is_hidden boolean default false,
+    is_hidden boolean not null default false,
+    total_chapter_num int not null  default 0,
     foreign key (authorID) references user (userID)
 );
+
+-- 获取章节数量触发器
+DELIMITER //
+CREATE TRIGGER update_total_chapter_num
+AFTER INSERT ON chapter
+FOR EACH ROW
+BEGIN
+    UPDATE novel n
+    SET n.total_chapter_num = (
+        SELECT COUNT(*)
+        FROM chapter c
+        WHERE c.novelID = n.novelID
+    )
+    WHERE n.novelID = NEW.novelID;
+END;
+//
+DELIMITER ;
 
 -- 章节表
 create table chapter (
@@ -30,12 +48,13 @@ create table chapter (
     title varchar(100),
     content text,
     create_at timestamp,
-    status int,
-    is_deleted boolean default false,
+    status int not null default 0,
+    is_deleted boolean not null default false,
     primary key (chapterID, novelID),
     foreign key (novelID) references novel (novelID)
 );
 
+-- 章节 ID 自增触发器
 DELIMITER //
 CREATE TRIGGER increment_chapterID
 BEFORE INSERT ON chapter
@@ -47,14 +66,3 @@ BEGIN
 END;
 //
 DELIMITER ;
-
--- 阅读表
-create table progress (
-    userID UUID,
-    novelID int,
-    chapterID varchar(50),
-    primary key (userID, novelID, chapterID),
-    foreign key (userID) references user (userID),
-    foreign key (novelID) references novel (novelID),
-    foreign key (novelID, chapterID) references chapter (novelID, chapterID)
-);

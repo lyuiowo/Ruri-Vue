@@ -14,13 +14,13 @@
     <div class="source-container table-container">
       <el-form :model="userInfo" label-position="top">
         <el-form-item label="用户ID">
-          <el-input v-model="store.userInfo.userID" disabled />
+          <el-input v-model="userInfo.userID" disabled />
         </el-form-item>
         <el-form-item label="用户名">
-          <el-input v-model="store.userInfo.username" />
+          <el-input v-model="userInfo.username" />
         </el-form-item>
         <el-form-item label="邮箱">
-          <el-input v-model="store.userInfo.email" autocomplete="on"/>
+          <el-input v-model="userInfo.email" autocomplete="on"/>
         </el-form-item>
       </el-form>
     </div>
@@ -39,9 +39,7 @@
 </style>
 
 <script>
-import { useStore } from '@/stores/pinia'
 import {Operation} from "@element-plus/icons-vue";
-import axios from "axios";
 import {ElMessage, ElNotification} from "element-plus";
 import mitt from "mitt";
 import eventBus from "@/plugins/eventBus";
@@ -49,17 +47,36 @@ import eventBus from "@/plugins/eventBus";
 export default {
   name: 'UserManage',
   components: { Operation },
-  data() {
-    return {
-      chapterList: [ ],
-      userInfo: { }
+
+  props: {
+    userData: {
+      type: Object,
+      default: () => ({
+        userID: "",
+        username: "",
+        email: "",
+      })
     }
   },
 
-  setup() {
-    const store = useStore()
+  data() {
     return {
-      store: store
+      chapterList: [ ],
+      userInfo: {
+        userID: "",
+        username: "",
+        email: "",
+      }
+    }
+  },
+
+  watch: {
+    userData: {
+      immediate: true,
+      handler(newValue) {
+        console.log("newValue", newValue)
+        this.userInfo = { ...newValue }
+      }
     }
   },
 
@@ -73,30 +90,7 @@ export default {
     },
 
     saveUserInfo() {
-      axios.post(
-          "http://localhost:8080/api/user/update",
-          null,
-          {
-            params: {
-              userID: this.userInfo.userID,
-              username: this.userInfo.username,
-              email: this.userInfo.email
-            }
-          }
-      ).then((response) => {
-        // console.log(response.data)
-        if (response.data.code === 200) {
 
-          this.store.updateUserInfo(this.userInfo)
-          ElMessage.success("修改成功")
-
-        } else {
-          throw new Error(response.data.msg)
-        }
-      }).catch((error) => {
-        // console.log(error)
-        ElMessage.error("修改失败")
-      })
     },
   }
 }

@@ -45,10 +45,9 @@
 </style>
 
 <script>
-import { Operation } from "@element-plus/icons-vue";
-import { useStore } from '@/stores/pinia';
-import axios from "axios";
-import moment from "moment";
+import { Operation } from "@element-plus/icons-vue"
+import { get, post } from "@/plugins/axios"
+import moment from "moment"
 
 export default {
   name: "BookManage",
@@ -59,17 +58,6 @@ export default {
     return {
       bookList: [ ]
     }
-  },
-
-  setup() {
-    const store = useStore()
-    return {
-      store: store,
-    }
-  },
-
-  created() {
-    this.bookList = this.store.bookList
   },
 
   methods: {

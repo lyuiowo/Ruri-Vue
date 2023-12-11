@@ -10,7 +10,7 @@
         </div>
         <div class="search-wrapper">
           <el-input size="small" placeholder="搜索书籍" class="search-input" v-model="search"
-                    @keyup.enter.native="searchBook()">
+                    @keyup.enter.native="searchNovel()">
             <template #prefix>
               <el-icon class="el-input__icon">
                 <Search/>
@@ -20,11 +20,11 @@
         </div>
         <div class="user-wrapper">
           <div class="user-title">
-            {{ store.isAuth ? "用户空间" : '请登录后操作' }}
-            <span class="right-text" v-if="store.userInfo.username" @click="logout">
+            {{ isAuth ? "用户空间" : '请登录后操作' }}
+            <span class="right-text" v-if="isAuth" @click="logout">
               注销
             </span>
-            <span class="right-text" v-else @click="login">
+            <span class="right-text" v-else @click="showLoginManageDialog = !showLoginManageDialog">
               登录
             </span>
           </div>
@@ -39,7 +39,7 @@
             创作中心
           </div>
           <div class="writing-item">
-            <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showBookManage">
+            <el-tag effect="dark" class="tag-btn" type="info" size="large" @click="showNovelManageDialog = !showNovelManageDialog">
               小说管理
             </el-tag>
           </div>
@@ -49,23 +49,26 @@
     <div class="shelf-wrapper">
       <div class="shelf-title">
         {{ isSearchResult ? "搜索" : "书架" }}
-        ({{ isSearchResult ? searchResult.length : bookList.length }})
+        ({{ isSearchResult ? searchResult.length : novelList.length }})
         <div class="title-btn" v-if="isSearchResult" @click="backToShelf">
           书架
         </div>
       </div>
-      <div class="books-wrapper" ref="bookList">
+      <div class="novels-wrapper" ref="novelList">
         <div class="wrapper">
-          <el-empty v-if="!store.bookList.length" description="创建我的小说">
+          <el-empty v-if="!novelList" description="创建我的小说">
             <el-button type="primary">创建小说</el-button>
           </el-empty>
-          <div class="book" v-for="book in bookList" :key="book.novelID">
-            <div class="book-info">
+          <div class="novel" v-for="novel in novelsToDisplay" :key="novel.novelID">
+            <div class="info">
               <div class="name">
-                {{ book.name }}
+                {{ novel.name }}
               </div>
               <div class="sub">
-                {{ book.totalChapterNum }}
+                共 {{ book.totalChapterNum }} 章
+              </div>
+              <div class="last-chapter" v-if="book.latestChapterTitle">
+                {{ book.lastCheckTime ? dateFormat(book.lastCheckTime) : "最新" }} ：{{ book.latestChapterTitle }}
               </div>
             </div>
           </div>
@@ -73,128 +76,221 @@
       </div>
     </div>
   </div>
+
+  <el-dialog v-model="showLoginManageDialog" width="35%">
+    <template #header>
+      <div class="custom-dialog-title">
+        <span class="el-dialog__title">
+          {{ isLogin ? "登录" : "注册" }}
+          <span class="float-right span-btn" @click="isLogin = !isLogin">
+            {{ isLogin ? "注册" : "登录" }}
+          </span>
+        </span>
+      </div>
+    </template>
+    <el-form :model="loginForm" label-position="top">
+      <el-form-item label="用户名" v-if="!isLogin">
+        <el-input v-model="loginForm.username" />
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="loginForm.email" autocomplete="on"/>
+      </el-form-item>
+      <el-form-item label="密码">
+        <el-input
+            v-model="loginForm.password"
+            autocomplete="on"
+            show-password
+            @keyup.enter.native="switchLoginAndRegister"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button size="default" @click="cancel">取 消</el-button>
+        <el-button size="default" type="primary" @click="switchLoginAndRegister">确 定</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <NovelManage v-model="showNovelManageDialog" />
+  <UserManage v-model="showUserManageDialog" :userData="userData"/>
+
 </template>
 
 <script>
-import {Search, Menu} from '@element-plus/icons-vue';
-import {useStore} from '@/stores/pinia';
-import {ElNotification, ElMessage} from "element-plus";
-import axios from "axios";
+import { Search, Menu } from '@element-plus/icons-vue';
+import { ElNotification, ElMessage } from "element-plus";
 import eventBus from '@/plugins/eventBus';
-import moment from "moment/moment";
+import { get, post } from "@/plugins/axios";
+import NovelManage from "@/components/NovelManage.vue";
+import UserManage from "@/components/UserManage.vue";
 
 export default {
   name: "Index",
 
-  components: {Search, Menu},
+  components: { Search, Menu, NovelManage, UserManage },
+
+  computed: {
+    novelsToDisplay() {
+      return this.isSearchResult ? this.searchResult : this.novelList
+    }
+  },
+
+  created() {
+    if (this.token) {
+      this.showLoginManageDialog = false
+      this.isAuth = true
+      this.searchMyShelf()
+    }
+  },
 
   data() {
     return {
-      username: "",
+      token: localStorage.getItem("token"),
       search: "",
 
+      loginForm: {
+        username: '',
+        email: '',
+        password: ''
+      },
+
+      isAuth: false,
+      isLogin: true,
       isSearchResult: false,
-      isExploreResult: false,
 
-      searchResult: [],
-    }
-  },
+      searchResult: [ ],
+      novelList: [ ],
+      userData: { },
 
-  computed: {
-    bookList() {
-      return this.isSearchResult ? this.searchResult : this.showShelfBooks;
-    },
-
-    showShelfBooks() {
-      return this.store.bookList;
-    }
-  },
-
-  setup() {
-    const store = useStore()
-    return {
-      store: store,
+      showLoginManageDialog: true,
+      showNovelManageDialog: false,
+      showUserManageDialog: false
     }
   },
 
   methods: {
-    showBookManage() {
-      this.searchMyBook()
-      eventBus.emit('showBookManage')
-    },
-
-    showUserManage() {
-      eventBus.emit('showUserManage')
+    switchLoginAndRegister() {
+      if (this.isLogin) {
+        this.login()
+      } else {
+        this.register()
+      }
     },
 
     login() {
-      eventBus.emit('showLogin')
+      const loginApi = '/login'
+      const params = this.loginForm
+      post(loginApi, null, params).then(response => {
+        if (response.code === 200) {
+          ElNotification.success({ title: "登录成功", message: response.msg })
+          const token = response.result[0].token
+          localStorage.setItem("token", token)
+          this.isAuth = true
+          this.showLoginManageDialog = false
+          this.searchMyShelf()
+        } else {
+          throw response.msg
+        }
+      }).catch(error => {
+        ElNotification.error({ title: "登录失败", message: error })
+      })
+    },
+
+    register() {
+      const registerApi = '/register'
+      const params = this.loginForm
+      post(registerApi, null, params).then(response => {
+        if (response.code === 200) {
+          ElMessage.success({ title: "注册成功" })
+        } else {
+          throw response.msg
+        }
+      }).catch(error => {
+        ElMessage.error({ title: "注册失败", message: error })
+      })
+    },
+
+    cancel() {
+      this.showLoginDialog = false
+      this.loginForm = {
+        username: '',
+        email: '',
+        password: ''
+      }
     },
 
     logout() {
-      this.store.userInfo = {}
-      this.store.token = ''
+      this.loginForm = {
+        username: '',
+        email: '',
+        password: ''
+      }
+      this.userInfo = { }
+      this.isAuth = false
+      localStorage.clear('token')
       ElNotification.info({
         title: "退出成功",
         message: "期待下次再来"
       })
     },
 
-    searchMyBook() {
-      axios.get(
-          'http://localhost:8080/api/novel/searchMyShelf',
-          {
-            params: {
-              token: this.store.token
-            }
+    showUserManage() {
+      const token = localStorage.getItem('token')
+      const userApi = '/user/searchUser'
+      const params = { token: token }
+      if (!token.length) {
+        ElMessage.error("请登录后使用")
+        this.showLoginDialog = true
+      } else {
+        get(userApi, params).then(response => {
+          if (response.code === 200) {
+            ElMessage.success("查询成功")
+            this.userData = response.result[0]
+            this.showUserManageDialog = true
+          } else {
+            throw response.msg
           }
-      ).then((response) => {
-        // console.log(response.data)
-
-        response.data.result.forEach((item) => {
-          const updateAt = moment(item.updateAt).format('YYYY/MM/DD H:mm:ss')
-          const createAt = moment(item.createAt).format('YYYY/MM/DD H:mm:ss')
-
-          item.updateAt = updateAt
-          item.createAt = createAt
+        }).catch(error => {
+          ElMessage.error(error)
         })
-
-        this.store.updateBookList(response.data.result)
-
-      }).catch((error) => {
-
-      })
+      }
     },
 
-    searchBook() {
-      if (this.store.token === '') {
+    searchNovel() {
+      if (sessionStorage.getItem("token") === '') {
         ElMessage.error('请登录后使用')
       }
-
-      axios.get(
-          "http://localhost:8080/api/novel/search",
-          {
-            params: {
-              q: this.search
-            }
-          }
-      ).then((response) => {
-        console.log(response.data)
-        this.searchResult = response.data.result
-
+      const novelApi = '/novel/search'
+      const params = { q: this.search }
+      get(novelApi, params).then(response => {
+        this.searchResult = response.result
         this.isSearchResult = true
-
-      }).catch((error) => {
-        console.log(error)
       })
     },
 
     backToShelf() {
       this.isSearchResult = false;
-      this.isExploreResult = false;
       this.searchResult = [];
     },
 
+    searchMyShelf() {
+      const novelApi = "/novel/searchMyShelf"
+      const params = { token: this.token }
+      get(novelApi, params).then(response => {
+        if (response.code === 200) {
+          this.novelList = response.result
+        } else {
+          throw response.msg
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+
+    searchChapter() {
+      const chapterApi = "/chapter/search"
+    }
   }
 }
 </script>
@@ -315,10 +411,39 @@ export default {
       }
     }
 
-    .books-wrapper {
+    .novels-wrapper {
       flex: 1;
       overflow-x: hidden;
       overflow-y: scroll;
+
+      .wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 380px);
+        justify-content: space-around;
+        grid-gap: 10px;
+
+        .novel {
+          user-select: none;
+          display: flex;
+          cursor: pointer;
+          margin-bottom: 18px;
+          padding: 24px 24px;
+          width: 360px;
+          flex-direction: row;
+          justify-content: space-around;
+
+          .info {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: start;
+            height: 112px;
+            margin-left: 20px;
+            flex: 1;
+          }
+        }
+      }
     }
   }
 }

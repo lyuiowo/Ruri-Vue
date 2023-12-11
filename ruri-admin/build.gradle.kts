@@ -3,11 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
-    id("io.freefair.lombok") version "8.1.0"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
     kotlin("plugin.jpa") version "1.8.22"
-    kotlin("plugin.lombok") version "1.9.10"
 }
 
 group = "top.lyuiowo"
@@ -31,6 +29,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.0")
     implementation("org.springframework.security:spring-security-crypto:6.1.5")
     implementation("io.jsonwebtoken:jjwt:0.12.3")
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

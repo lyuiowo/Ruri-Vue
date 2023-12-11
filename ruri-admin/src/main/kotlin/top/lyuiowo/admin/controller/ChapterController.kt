@@ -12,6 +12,7 @@ import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.LoggerManager
 import top.lyuiowo.admin.utils.ResultCode
 import top.lyuiowo.admin.utils.TokenManager
+import java.time.LocalDateTime
 import java.util.UUID
 
 @RestController
@@ -25,16 +26,15 @@ class ChapterController(
     @GetMapping("/search")
     fun searchChapter(
         request: HttpServletRequest,
-        @RequestParam id: Int,
-        @RequestParam key: Int
-    ): ApiManager<out List<Chapter?>?> {
-        val existingChapter = when (key) {
-            1 -> chapterService.getInfoByChapterID(id)
-            2 -> chapterService.getInfoByNovelID(id)
-            else -> ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
+        @RequestParam nid: Int,
+        @RequestParam cid: Int? = null
+    ): ApiManager<out Any>? {
+        val existingChapter = if (cid != null) {
+            chapterService.getInfoByChapterID(cid, nid)
+        } else {
+            chapterService.getInfoByNovelID(nid)
         }
-        loggerManager.getLogger(request, existingChapter.code)
-
+        loggerManager.getLogger(request, 200)
         return existingChapter
     }
 

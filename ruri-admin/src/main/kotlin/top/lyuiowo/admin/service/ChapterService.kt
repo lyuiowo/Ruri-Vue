@@ -21,17 +21,17 @@ class ChapterService(
      * @param chapterID 章节 ID
      * @return 对应章节的信息
      */
-    fun getInfoByChapterID(chapterID: Int): ApiManager<List<Chapter>?> {
-        val existingChapter =  chapterRepository.findByChapterID(chapterID)
+    fun getInfoByChapterID(chapterID: Int, novelID: Int): ApiManager<Chapter>? {
+        val existingChapter =  chapterRepository.findByChapterIDAndNovelID(chapterID, novelID)
 
         if (existingChapter != null) {
             return ApiManager(
                 ResultCode.SUCCESS.code,
                 ResultCode.SUCCESS.msg,
-                listOf(existingChapter)
+                existingChapter
             )
         }
-        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, null)
     }
 
     /**
