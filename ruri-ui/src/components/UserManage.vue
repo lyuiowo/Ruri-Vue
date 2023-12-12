@@ -74,7 +74,6 @@ export default {
     userData: {
       immediate: true,
       handler(newValue) {
-        console.log("newValue", newValue)
         this.userInfo = { ...newValue }
       }
     }

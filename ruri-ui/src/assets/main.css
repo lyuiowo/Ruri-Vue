@@ -1,1 +1,90 @@
 @import './base.css';
+
+.index-wrapper,
+.writer-wrapper {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    .navigation-wrapper {
+        width: 260px;
+        min-width: 260px;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: #F7F7F7;
+        position: relative;
+
+        .navigation-inner-wrapper {
+            padding: 48px 36px 66px 36px;
+            height: 100%;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .navigation-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .navigation-sub-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 16px;
+            color: #b1b1b1;
+        }
+
+        .search-wrapper {
+            .search-input {
+                margin-top: 18px;
+            }
+
+            :deep( .el-input__wrapper ) {
+                border-radius: 50px;
+                border-color: #E3E3E3;
+            }
+        }
+
+        .user-wrapper {
+            margin-top: 36px;
+
+            .user-title {
+                font-size: 14px;
+                color: #b1b1b1;
+            }
+
+            .right-text {
+                float: right;
+                display: inline-block;
+                height: 22px;
+                line-height: 22px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .user-item {
+                padding-top: 16px;
+            }
+        }
+
+        .writing-wrapper {
+            margin-top: 36px;
+
+            .writing-title {
+                font-size: 14px;
+                color: #b1b1b1;
+            }
+
+            .writing-item {
+                padding-top: 16px;
+            }
+        }
+
+        .tag-btn {
+            width: 100%;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+    }
+}

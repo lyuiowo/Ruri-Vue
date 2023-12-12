@@ -27,10 +27,15 @@ class ChapterController(
     fun searchChapter(
         request: HttpServletRequest,
         @RequestParam nid: Int,
-        @RequestParam cid: Int? = null
+        @RequestParam cid: Int? = null,
+        @RequestParam title: String? = null
     ): ApiManager<out Any>? {
         val existingChapter = if (cid != null) {
-            chapterService.getInfoByChapterID(cid, nid)
+            if (title != null) {
+                chapterService.getInfoByTitle(nid, title)
+            } else {
+                chapterService.getInfoByChapterID(cid, nid)
+            }
         } else {
             chapterService.getInfoByNovelID(nid)
         }

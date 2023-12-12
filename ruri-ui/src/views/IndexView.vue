@@ -64,11 +64,13 @@
               <div class="name">
                 {{ novel.name }}
               </div>
-              <div class="sub">
-                共 {{ book.totalChapterNum }} 章
+              <div class="last-chapter" v-if="novel.latestChapterTitle">
+                <el-link :underline="false" :href="'/writer/' + novel.novelID">
+                  {{ novel.latestChapterTitle }}
+                </el-link>
               </div>
-              <div class="last-chapter" v-if="book.latestChapterTitle">
-                {{ book.lastCheckTime ? dateFormat(book.lastCheckTime) : "最新" }} ：{{ book.latestChapterTitle }}
+              <div class="sub">
+                共 {{ novel.totalChapterNum }} 章
               </div>
             </div>
           </div>
@@ -120,7 +122,6 @@
 <script>
 import { Search, Menu } from '@element-plus/icons-vue';
 import { ElNotification, ElMessage } from "element-plus";
-import eventBus from '@/plugins/eventBus';
 import { get, post } from "@/plugins/axios";
 import NovelManage from "@/components/NovelManage.vue";
 import UserManage from "@/components/UserManage.vue";
@@ -181,7 +182,7 @@ export default {
     login() {
       const loginApi = '/login'
       const params = this.loginForm
-      post(loginApi, null, params).then(response => {
+      post(loginApi, params).then(response => {
         if (response.code === 200) {
           ElNotification.success({ title: "登录成功", message: response.msg })
           const token = response.result[0].token
@@ -200,7 +201,7 @@ export default {
     register() {
       const registerApi = '/register'
       const params = this.loginForm
-      post(registerApi, null, params).then(response => {
+      post(registerApi, params).then(response => {
         if (response.code === 200) {
           ElMessage.success({ title: "注册成功" })
         } else {
@@ -277,9 +278,18 @@ export default {
     searchMyShelf() {
       const novelApi = "/novel/searchMyShelf"
       const params = { token: this.token }
+      let novelList = [ ]
       get(novelApi, params).then(response => {
         if (response.code === 200) {
-          this.novelList = response.result
+          novelList = response.result
+          novelList.forEach((item) => {
+            if (item.totalChapterNum == null) {
+              item.totalChapterNum = 0
+            }
+          })
+          this.novelList = novelList
+
+          this.setChapterTitle()
         } else {
           throw response.msg
         }
@@ -288,101 +298,29 @@ export default {
       })
     },
 
-    searchChapter() {
+    setChapterTitle() {
       const chapterApi = "/chapter/search"
+      this.novelList.forEach((item) => {
+        const params = { nid: item.novelID, cid: item.totalChapterNum }
+        get(chapterApi, params).then(response => {
+          console.log(response)
+          const chapter = response.result
+          if (response.code === 200) {
+            item.latestChapterTitle = chapter.title
+          } else {
+            item.latestChapterTitle = "暂无章节"
+          }
+        })
+      })
     }
   }
 }
 </script>
 
 <style lang="stylus" scoped>
+@import "@/assets/main.css";
+
 .index-wrapper {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-
-  .navigation-wrapper {
-    width: 260px;
-    min-width: 260px;
-    height: 100%;
-    box-sizing: border-box;
-    background-color: #F7F7F7;
-    position: relative;
-
-    .navigation-inner-wrapper {
-      padding: 48px 36px 66px 36px;
-      height: 100%;
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
-
-    .navigation-title {
-      font-size: 22px;
-      font-weight: 600;
-    }
-
-    .navigation-sub-title {
-      font-size: 16px;
-      font-weight: 500;
-      margin-top: 16px;
-      color: #b1b1b1;
-    }
-
-    .search-wrapper {
-      .search-input {
-        margin-top: 18px;
-      }
-
-      :deep( .el-input__wrapper ) {
-        border-radius: 50px;
-        border-color: #E3E3E3;
-      }
-    }
-
-    .user-wrapper {
-      margin-top: 36px;
-
-      .user-title {
-        font-size: 14px;
-        color: #b1b1b1;
-      }
-
-      .right-text {
-        float: right;
-        display: inline-block;
-        height: 22px;
-        line-height: 22px;
-        cursor: pointer;
-        user-select: none;
-      }
-
-      .user-item {
-        padding-top: 16px;
-      }
-    }
-
-    .writing-wrapper {
-      margin-top: 36px;
-
-      .writing-title {
-        font-size: 14px;
-        color: #b1b1b1;
-      }
-
-      .writing-item {
-        padding-top: 16px;
-      }
-    }
-
-    .tag-btn {
-      width: 100%;
-      margin-right: 15px;
-      margin-bottom: 15px;
-      cursor: pointer;
-    }
-  }
-
   .shelf-wrapper {
     padding: 48px 48px;
     height: 100%;
@@ -417,30 +355,38 @@ export default {
       overflow-y: scroll;
 
       .wrapper {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 380px);
-        justify-content: space-around;
-        grid-gap: 10px;
+        display: flex;
+        flex-direction: column;
 
         .novel {
-          user-select: none;
+          margin-bottom: 12px;
           display: flex;
-          cursor: pointer;
-          margin-bottom: 18px;
-          padding: 24px 24px;
-          width: 360px;
           flex-direction: row;
-          justify-content: space-around;
+          padding: 24px 24px;
 
           .info {
+            flex: 1;
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: start;
-            height: 112px;
             margin-left: 20px;
-            flex: 1;
+
+            .name {
+              font-size: 20px;
+              font-weight: bold;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+              cursor: pointer;
+
+              &:hover {
+                color: #0067e6;
+              }
+            }
+
+            .last-chapter {
+              font-size: 14px;
+            }
           }
         }
       }

@@ -10,6 +10,9 @@ interface ChapterRepository: JpaRepository<Chapter, Int> {
     fun findByChapterID(chapterID: Int): Chapter?
     fun findByNovelID(novelID: Int): List<Chapter?>?
 
+    @Query("select c from Chapter c where c.novelID = :novelID and c.title like :title")
+    fun findByNovelIDAndTitle(@Param("novelID") novelID: Int, @Param("title") title: String): Chapter?
+
     @Query("select c from Chapter c where c.novelID = :novelID and c.chapterID = :chapterID")
     fun findByChapterIDAndNovelID(@Param("chapterID") chapterID: Int, @Param("novelID") novelID: Int): Chapter?
 }

@@ -14,9 +14,9 @@ export const get = async (path, params) => {
     }
 }
 
-export const post = async (path, data, params) => {
+export const post = async (path, params) => {
     try {
-        const response = await request.post(path, data, { params: params })
+        const response = await request.post(path, null, { params: params })
         return response.data
     } catch (error) {
         throw new Error(error)

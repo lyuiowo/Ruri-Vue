@@ -49,6 +49,19 @@ class ChapterService(
         )
     }
 
+    /**
+     *
+     */
+    fun getInfoByTitle(novelID: Int, title: String): ApiManager<Chapter>? {
+        val existingChapter = chapterRepository.findByNovelIDAndTitle(novelID, title)
+
+        return ApiManager(
+            ResultCode.SUCCESS.code,
+            ResultCode.SUCCESS.msg,
+            existingChapter
+        )
+    }
+
     fun createChapter(novelID: Int, title: String, content: String, token: String): ApiManager<List<Chapter>> {
         val userID = TokenManager.extractUserIDFromToken(token)
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
