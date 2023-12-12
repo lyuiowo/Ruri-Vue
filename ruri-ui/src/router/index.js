@@ -9,17 +9,28 @@ const router = createRouter({
 			component: () => import('../views/IndexView.vue')
 		},
 		{
-			path: '/reader',
-			name: 'reader',
-			// route level code-splitting
-			// this generates a separate chunk (About.[hash].js) for this route
-			// which is lazy-loaded when the route is visited.
-			component: () => import('../views/ReaderView.vue')
+			path: '/idea',
+			name: 'idea',
+			component: () => import('../views/IdeaView.vue')
 		},
 		{
-			path: '/writer/:novelID',
+			path: '/square',
+			name: 'square',
+			component: () => import('../views/SquareVue.vue')
+		},
+		{
+			path: '/about',
+			name: 'about',
+			component: () => import('../views/About.vue')
+		},
+		{
+			path: '/writer',
 			name: 'writer',
-			component: () => import('../views/WriterView.vue')
+			component: () => import('../views/WriterView.vue'),
+			beforeEnter: (to, from, next) => {
+				document.querySelector('.navigation-wrapper').style.display = 'none'
+				next()
+			}
 		}
 	]
 })

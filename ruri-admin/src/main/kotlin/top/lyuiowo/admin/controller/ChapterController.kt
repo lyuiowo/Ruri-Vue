@@ -62,9 +62,10 @@ class ChapterController(
         request: HttpServletRequest,
         @RequestParam id: Int,
         @RequestParam title: String,
-        @RequestParam content: String
+        @RequestParam content: String,
+        @RequestParam status: Int
     ): ApiManager<List<Chapter>?> {
-        val existingChapter = chapterService.updateChapter(id, title, content)
+        val existingChapter = chapterService.updateChapter(id, title, content, status)
         loggerManager.getLogger(request, existingChapter.code)
 
         return existingChapter

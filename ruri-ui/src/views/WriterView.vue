@@ -1,156 +1,414 @@
 <template>
-    <div class="writer-wrapper">
-      <div class="navigation-wrapper">
-        <div class="navigation-inner-wrapper">
-          <div class="navigation-title">
-            小说创作平台
+  <div class="editor-wrapper">
+    <div class="editor-header">
+      <div class="navbar">
+        <el-tag class="nav-btn">
+          <el-icon color="#ebebeb"> <Menu /> </el-icon>
+        </el-tag>
+      </div>
+      <div class="info-box">
+        <div class="info item">
+          <div class="title">
+            无标题
           </div>
-          <div class="navigation-sub-title">
-            清风不识字，何故乱翻书
+          <div class="chapter-info">
+            <el-icon> <EditPen /> </el-icon>
+            字数统计: {{ count }} 字
           </div>
-          <div class="search-wrapper">
-            <el-input size="small" placeholder="搜索章节" class="search-input" v-model="search"
-                      @keyup.enter.native="searchChapter()">
-              <template #prefix>
-                <el-icon class="el-input__icon">
-                  <Search/>
-                </el-icon>
-              </template>
-            </el-input>
+        </div>
+        <div class="item" />
+      </div>
+      <div class="tools-bar">
+        <el-button class="save-btn" @click="saveChapter(novelID)">
+          <el-icon><CirclePlusFilled /></el-icon>
+          <span>保存</span>
+        </el-button>
+        <el-button class="save-btn" @click="saveChapter(novelID)">
+          <el-icon><Position /></el-icon>
+          <span>发布</span>
+        </el-button>
+      </div>
+    </div>
+    <div class="editor-box">
+      <div class="editor">
+        <div class="editor-core-box">
+          <div class="input-box">
+            <el-input
+              name="title"
+              type="text"
+              v-model="title"
+              class="input"
+              tabindex="1"
+              placeholder="请输入章节标题"
+            />
           </div>
-          <div class="drafts-wrapper">
-            <div class="draft-chapter" v-for="item in searchResult">
-
-            </div>
+          <div class="value-box">
+            <el-input
+              name="content"
+              type="textarea"
+              v-model="content"
+              class="value"
+              tabindex="2"
+              placeholder="请输入章节正文。"
+              resize="none"
+              :autosize="{ minRows: 5 }"
+            />
           </div>
-
         </div>
       </div>
-      <div class="chapter-wrapper">
-        <div class="tools-bar">
-          <el-button @click="back">
-            <el-icon>
-              <back />
-            </el-icon>
-            返回
-          </el-button>
-          <el-button @click="save">
-            保存
-          </el-button>
-        </div>
-        <div class="title">
-          <el-input v-model="chapter.title" label="请输入章节号和章节名。示例：第三章 十里桃花"></el-input>
+      <div class="chapter-position">
+        <div class="chapter-box">
+          <div class="chapter-title-box">
+            <div class="title">
+              {{ novelTitle }}
+            </div>
+            <div class="descrption">每次修改都记得保存哦</div>
+          </div>
+          <div class="chapter-list-box">
+            <el-collapse class="list-box" v-model="active">
+              <el-collapse-item class="status-list" v-for="status in statusList">
+                <template #title>
+                  <div class="title-box">
+                    {{ status.title }}
+                  </div>
+                </template>
+                <div class="chapter-item" v-for="chapter in chapterList[status.status]" @click="editChapter(chapter.status, chapter.chapterID)">
+                  {{ chapter.title }}
+                </div>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
-import {get, post} from "@/plugins/axios";
-import {Back, Search} from "@element-plus/icons-vue";
-
+import {CirclePlusFilled, EditPen, Menu, Position} from '@element-plus/icons-vue'
+import axios from "axios";
+import {ElMessage, ElMessageBox} from "element-plus";
 export default {
-  name: 'Writer',
-  components: {Back, Search},
+  components: {Position, CirclePlusFilled, EditPen, Menu},
 
   data() {
     return {
-      chapter: {
-        title: "",
-        content: "",
-        cid: 1,
-        status: 0
-      },
+      count: 0,
+      title: "",
+      content: "",
 
-      chapterList: {
-        0: [ ], // 保存
-        1: [ ], // 发布
-        2: [ ], // 删除
-      },
-
+      novelTitle: "",
       novelID: 0,
-      search: '',
-      searchResult: [ ]
+      chapterID: null,
+
+      active: [],
+      statusList: [ {title: '已保存', status: 0}, {title: "已发布", status: 1}, {title: "已删除", status: 2} ],
+      chapterList: {
+        0: [ ],
+        1: [ ],
+        2: [ ]
+      },
     }
   },
 
-  mounted() {
-    this.novelID = this.$route.params.novelID
-    this.searchAllChapter()
+  created() {
+    const nid = this.$route.query.nid
+    this.novelID = nid
+    const cid = this.$route.query.cid || ''
+    this.searchNovelTitle(nid)
+    this.searchChapterList(nid)
+
+    if (cid) {
+      this.searchChapter(nid, cid)
+    }
+
   },
 
   methods: {
-    back() {
-      this.$router.push('/')
+    searchNovelTitle(nid) {
+      axios.get("http://localhost:8080/api/novel/searchNovel", { params: { nid: nid } }).then(response => {
+        const novel = response.data.result
+        this.novelTitle = novel.name
+      })
     },
 
-    save() {
-      const chapterApi = '/chapter'
-      let params = { token: localStorage.getItem("token"), title: this.chapter.title, content: this.chapter.content }
-      if (this.chapter.cid === 0) {
-        params.id = parseInt(this.novelID, 10)
-        post(chapterApi + '/create', params).then(response => {
-          console.log("创建章节: ", response)
-        })
-      } else {
-        params.id = this.chapter.cid
-        post(chapterApi + '/update', params).then(response => {
-          console.log("保存章节: ", response)
-        })
-      }
-    },
+    searchChapterList(nid) {
+      axios.get("http://localhost:8080/api/chapter/search", { params: { nid: nid } }).then(response => {
+        const chapterList = response.data.result
 
-    searchAllChapter() {
-      const chapterApi = '/chapter/search'
-      const params = { nid: this.novelID }
-      get(chapterApi, params).then(response => {
-        console.log(response.result)
-        response.result.forEach((item) => {
+        chapterList.forEach((item) => {
           switch (item.status) {
             case 0:
-              this.chapterList["0"].push(item)
-              break;
+              this.chapterList['0'].push(item)
+              break
             case 1:
-              this.chapterList["1"].push(item)
-              break;
+              this.chapterList['1'].push(item)
+              break
             case 2:
-              this.chapterList["2"].push(item)
+              this.chapterList['2'].push(item)
+              break
           }
         })
-        console.log(this.chapterList)
       })
     },
 
-    searchChapter() {
-      const chapterApi = '/chapter/search'
-      const params = { nid: this.novelID, title: this.search }
-      get(chapterApi, params).then(response => {
-        console.log(response.result)
-        this.searchResult = response.result
+    searchChapter(nid, cid) {
+      axios.get("http://localhost:8080/api/chapter/search", { params: { nid: nid, cid: cid } }).then(response => {
+        const chapter = response.data.result
+        if (chapter) {
+          this.title = chapter.title
+          this.content = chapter.content
+        }
       })
+    },
+
+    editChapter(status, chapterID) {
+      ElMessageBox.confirm(
+          '该操作会导致未保存的内容丢失，请确认保存后再进行操作',
+          '警告',
+          {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+      ).then(() => {
+        ElMessage.success("成功")
+        const foundChapter = this.chapterList[status].find(chapter => chapter.chapterID === chapterID);
+        if (foundChapter) {
+          this.title = foundChapter.title
+          this.content = foundChapter.content
+          this.chapterID = chapterID
+        }
+      }).catch(() => {
+        ElMessage.info("取消")
+      })
+    },
+
+    saveChapter(nid) {
+      if (this.chapterID !== null) {
+        axios.post(
+          "http://localhost:8080/api/chapter/update",
+          null,
+            { params: { id: this.chapterID, title: this.title, content: this.content, status: 0}}
+        ).then(response => {
+          console.log(response.data)
+        })
+      } else {
+        axios.post(
+            "http://localhost:8080/api/chapter/create",
+            null,
+            { params: { id: nid, title: this.title, content: this.content, status: 0 }}
+        ).then(response => {
+          console.log(response.data)
+        })
+      }
     }
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-@import "@/assets/main.css";
+.editor-wrapper {
+  background-color: #FAFBFC;
+  width: 100%;
+  height: 100vh;
 
-.writer-wrapper {
-  .chapter-wrapper {
-    padding: 48px 48px;
-    height: 100%;
-    max-height: 100%;
-    width: 100%;
-    background-color: #fff;
+  .editor-header {
+    background-color: white;
     display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
+    height: 60px;
+    width: 100%;
+    border-bottom: 1px solid #ebebeb;
+    align-items: center;
+
+    .navbar {
+      text-align: center;
+      flex: 0 0 60px;
+      height: 60px;
+      cursor: pointer;
+
+      .nav-btn {
+        background-color: transparent;
+        border: none;
+        border-right: 1px solid #ebebeb;
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .info-box {
+      flex: 1;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .item {
+        flex: 1;
+      }
+    }
+
+    .info {
+      padding-left: 34px;
+
+      .title {
+        color: #262626;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .chapter-info {
+        color: #898a95;
+        font-size: 12px;
+        font-weight: 400;
+      }
+    }
 
     .tools-bar {
-      margin-bottom: 12px;
+      padding-right: 40px;
+
+      .save-btn {
+        width: 98px;
+        height: 32px;
+        background: transparent;
+        border-radius: 25px;
+        margin-right: 12px;
+      }
+
+      .save-btn:hover {
+        border: #ec7070 1px solid;
+        color: #ec7070;
+      }
+    }
+  }
+
+  .editor-box {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 60px);
+    padding-left: 24px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .editor {
+    flex: 1;
+    padding-top: 31px;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    overflow-y: scroll;
+    position: relative;
+
+    .editor-core-box {
+      width: 100%;
+      padding: 90px 0;
+      background: #fff;
+      position: relative;
+      min-height: 100%;
+      border: 1px solid #ebebeb;
+
+      .input-box {
+        height: 42px;
+        margin-bottom: 24px;
+        width: 100%;
+      }
+
+      .input {
+        height: 100%;
+        padding-left: 90px;
+        padding-right: 90px;
+        width: 100%;
+        color: #3e4155;
+        font-size: 30px;
+        font-weight: 400;
+
+        :deep(.el-input__wrapper) {
+          box-shadow: unset;
+          border: none;
+        }
+      }
+
+      .value-box {
+        width: 100%;
+        position: relative;
+        min-height: 30px;
+        word-break: break-all;
+      }
+
+      .value {
+        min-height: 200px;
+        padding-left: 90px;
+        padding-right: 90px;
+        width: 100%;
+        font-size: 16px;
+        font-weight: 400;
+        color: #3e4155;
+
+        :deep(.el-textarea__inner:hover),
+        :deep(.el-textarea__inner) {
+          border: none;
+          box-shadow: unset;
+        }
+      }
+    }
+  }
+
+  .chapter-position {
+    padding-top: 31px;
+    padding-right: 24px;
+    flex: 0 0 424px;
+    height: 100%;
+    top: 0;
+    right: 0;
+
+    .chapter-box {
+      display: flex;
+      flex-direction: column;
+
+      .chapter-title-box {
+        padding-bottom: 16px;
+      }
+
+      .title {
+        color: #262626;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .descrption {
+        color: #898a95;
+        font-size: 12px;
+        font-weight: 400;
+      }
+
+      .status-list {
+        margin-bottom: 12px;
+      }
+
+      .status-list:last-child {
+        margin-bottom: 0;
+      }
+
+      :deep(.el-collapse-item__header) {
+        border-radius: 10px 10px 0 0;
+      }
+
+      .list-box {
+        padding: 12px;
+
+        .title-box {
+          padding-left: 12px;
+        }
+
+        .chapter-item {
+          padding-left: 12px;
+          cursor: pointer;
+        }
+      }
     }
   }
 }
-
 </style>

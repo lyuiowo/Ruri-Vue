@@ -30,6 +30,17 @@ class NovelController (
         return existingNovelList
     }
 
+    @GetMapping("/searchNovel")
+    fun searchNovel(
+        request: HttpServletRequest,
+        @RequestParam nid: Int,
+    ): ApiManager<Novel> {
+        val existingNovel = novelService.findNovelByID(nid)
+        loggerManager.getLogger(request, existingNovel.code)
+
+        return existingNovel
+    }
+
     @GetMapping("/searchMyShelf")
     fun searchMyShelf(
         request: HttpServletRequest,

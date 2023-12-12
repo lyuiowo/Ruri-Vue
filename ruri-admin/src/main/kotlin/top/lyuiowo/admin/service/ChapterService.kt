@@ -89,11 +89,16 @@ class ChapterService(
      * @param content 内容
      * @return 更新结果
      */
-    fun updateChapter(chapterID: Int, title: String, content: String): ApiManager<List<Chapter>?> {
+    fun updateChapter(chapterID: Int, title: String, content: String, status: Int): ApiManager<List<Chapter>?> {
         val chapter = chapterRepository.findByChapterID(chapterID)
         if (chapter != null && !chapter.isDeleted) {
             chapter.title = title
             chapter.content = content
+
+            if (status != 0) {
+                chapter.status = status
+            }
+
             val updatedChapter = chapterRepository.save(chapter)
             return ApiManager(
                 ResultCode.SUCCESS.code, "更新成功", listOf(updatedChapter)

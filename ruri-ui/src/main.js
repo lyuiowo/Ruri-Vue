@@ -1,7 +1,6 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
@@ -16,7 +15,6 @@ app.use(ElementPlus, {
 		preference: 'no-preference' // 禁用 Vue 的暗黑模式
 	}
 })
-app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
