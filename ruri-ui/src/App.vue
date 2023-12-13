@@ -34,7 +34,8 @@
       </div>
     </div>
 
-    <router-view />
+    <router-view>
+    </router-view>
   </div>
 </template>
 
@@ -93,7 +94,7 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style scoped>
 .index-wrapper {
   height: 100vh;
   width: 100%;
@@ -176,6 +177,10 @@ export default {
       background: #ececec;
       transition: all .4s;
     }
+  }
+
+  .index-view {
+    flex: 1;
   }
 }
 </style>

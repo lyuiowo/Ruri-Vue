@@ -9,7 +9,7 @@
       <div class="info-box">
         <div class="info item">
           <div class="title">
-            无标题
+              {{ title ? title : "无标题" }}
           </div>
           <div class="chapter-info">
             <el-icon> <EditPen /> </el-icon>
@@ -124,7 +124,20 @@ export default {
 
   },
 
+  mounted() {
+    this.intervalId = setInterval(this.countNum, 3000);
+  },
+
+  beforeUnmount() {
+    clearInterval(this.intervalId);
+  },
+
   methods: {
+    countNum() {
+      const content = this.content.replace(/(\n)+/g, '<br>');
+      this.count = this.content.length
+    },
+
     searchNovelTitle(nid) {
       axios.get("http://localhost:8080/api/novel/searchNovel", { params: { nid: nid } }).then(response => {
         const novel = response.data.result

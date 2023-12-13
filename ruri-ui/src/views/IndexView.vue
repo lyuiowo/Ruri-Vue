@@ -1,13 +1,186 @@
 <template>
-  Index
+  <div class="index__view">
+    <div class="page-header">
+      <div class="user-profile">
+        <span class="user-name">{{ username }}</span>
+        <el-avatar class="user-avatar" :size="'small'" :src="avatar"/>
+      </div>
+    </div>
+    <div class="index-page">
+      <div class="index-position">
+        <el-button class="create-btn" :icon="EditPen">
+          创建小说
+        </el-button>
+      </div>
+      <div class="banner-box">
+        <div class="item item-1">
+          <div>
+            <div class="banner-title">
+              开始描绘你梦想中的世界吧！
+            </div>
+          </div>
+          <el-button type="default" class="button" :icon="EditPen">
+            创建小说
+          </el-button>
+        </div>
+        <div class="item item-2"></div>
+        <div class="item item-3"></div>
+      </div>
+      <div class="title">
+        <div class="tip-title">
+          <span class="title-text">
+            小说列表
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-export default {
+import {EditPen} from "@element-plus/icons-vue";
 
+export default {
+  computed: {
+    EditPen() {
+      return EditPen
+    }
+  },
+  data() {
+    return {
+      token: '',
+      username: '你好',
+      avatar: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+    }
+  },
+
+  methods: {
+
+  }
 }
 </script>
 
 <style>
+.index__view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.page-header {
+  height: 80px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 40px;
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+
+    .user-name {
+      font-size: 14px;
+      color: #7A8087;
+    }
+
+    .user-avatar {
+      margin-left: 5px;
+    }
+  }
+}
+
+.index-page {
+  padding-top: 16px;
+
+  .create-btn {
+    width: 130px;
+    height: 36px;
+    position: absolute;
+    top: 24px;
+    left: 40px;
+    border: none;
+
+    background-color: rgba(0, 214, 166, .8);
+    color: white;
+  }
+
+  .banner-box {
+    display: flex;
+    flex-direction: row;
+    margin: 0 40px 33px 40px;
+
+    .item {
+      flex: 1;
+      height: 212px;
+    }
+
+    .item-1 {
+      background-color: rgba(0, 214, 166, .1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30px 0 30px 36px;
+      border-radius: 10px 0 0 10px;
+
+      .banner-title {
+        color: #3e5870;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        white-space: nowrap;
+        position: absolute;
+      }
+
+      .button {
+        width: 147px;
+        height: 50px;
+        border-radius: 10px;
+
+        background-color: rgba(0, 214, 166, .8);
+        color: white;
+        border: none;
+      }
+    }
+
+    .item-2 {
+      background-color: rgba(0, 214, 166, .2);
+    }
+
+    .item-3 {
+      background-color: rgba(0, 214, 166, .3);
+      border-radius: 0 10px 10px 0;
+    }
+  }
+
+  .title {
+    margin: 0 0 13px 40px;
+
+    .tip-title {
+      position: relative;
+      padding-left: 5px;
+
+      .title-text {
+        position: relative;
+        font-size: 18px;
+        color: #262626;
+        font-weight: 600;
+      }
+    }
+
+    .tip-title::before {
+      position: absolute;
+      content: "";
+      width: 79px;
+      height: 13px;
+      bottom: 5px;
+      left: 0;
+      z-index: 0;
+      opacity: .6;
+      background: linear-gradient(90deg, #ec7070 0%, rgba(236, 112, 112, 0) 100%);
+    }
+  }
+}
 
 </style>

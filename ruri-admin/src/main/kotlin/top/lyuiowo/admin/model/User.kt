@@ -13,6 +13,7 @@ data class User (
     @Id
     val userID: UUID,
     var username: String,
+    var avatar: String,
     var email: String,
     @get:JsonIgnore
     var password: String,
