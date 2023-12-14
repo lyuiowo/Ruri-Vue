@@ -158,15 +158,15 @@ export default {
       }
 
       .btn-component.active {
-        background-color: #ec70701a;
+        background-color: rgba(0, 170, 144, .2);
 
         .slider-btn-icon {
-          color: #ec7070;
+          color: rgba(0, 170, 144, 1);
         }
       }
 
       .btn-component:hover {
-        color: #ec7070;
+        color: rgba(0, 170, 144, 1);
         border: none;
       }
     }
@@ -177,10 +177,6 @@ export default {
       background: #ececec;
       transition: all .4s;
     }
-  }
-
-  .index-view {
-    flex: 1;
   }
 }
 </style>

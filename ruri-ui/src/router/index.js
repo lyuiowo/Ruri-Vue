@@ -16,12 +16,12 @@ const router = createRouter({
 		{
 			path: '/square',
 			name: 'square',
-			component: () => import('../views/SquareVue.vue')
+			component: () => import('../views/SquareView.vue')
 		},
 		{
 			path: '/about',
 			name: 'about',
-			component: () => import('../views/About.vue')
+			component: () => import('../views/AboutView.vue')
 		},
 		{
 			path: '/writer',

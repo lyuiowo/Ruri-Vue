@@ -102,7 +102,7 @@ export default {
     left: 40px;
     border: none;
 
-    background-color: rgba(0, 214, 166, .8);
+    background-color: rgba(143, 119, 181, .8);
     color: white;
   }
 
@@ -117,7 +117,7 @@ export default {
     }
 
     .item-1 {
-      background-color: rgba(0, 214, 166, .1);
+      background-color: rgba(143, 119, 181, .1);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -138,18 +138,18 @@ export default {
         height: 50px;
         border-radius: 10px;
 
-        background-color: rgba(0, 214, 166, .8);
+        background-color: rgba(143, 119, 181, .8);
         color: white;
         border: none;
       }
     }
 
     .item-2 {
-      background-color: rgba(0, 214, 166, .2);
+      background-color: rgba(143, 119, 181, .2);
     }
 
     .item-3 {
-      background-color: rgba(0, 214, 166, .3);
+      background-color: rgba(143, 119, 181, .3);
       border-radius: 0 10px 10px 0;
     }
   }
@@ -178,7 +178,7 @@ export default {
       left: 0;
       z-index: 0;
       opacity: .6;
-      background: linear-gradient(90deg, #ec7070 0%, rgba(236, 112, 112, 0) 100%);
+      background: linear-gradient(90deg, #8F77B5FF 0%, rgba(143, 119, 181, 0) 100%);
     }
   }
 }
