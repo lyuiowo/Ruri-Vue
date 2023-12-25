@@ -1,11 +1,5 @@
 <template>
   <div class="idea__view">
-    <div class="page-header">
-      <div class="user-profile">
-        <span class="user-name">{{ username }}</span>
-        <el-avatar class="user-avatar" :size="'small'" :src="avatar"/>
-      </div>
-    </div>
     <div class="idea-page">
       <div class="banner-box">
         <div class="item item-1">
@@ -14,7 +8,7 @@
               记录下梦中零碎的灵感！
             </div>
           </div>
-          <el-button type="default" class="button" :icon="EditPen">
+          <el-button type="default" class="button" :icon="EditPen" @click="createIdea">
             创建灵感
           </el-button>
         </div>
@@ -28,12 +22,27 @@
           </span>
         </div>
       </div>
+      <div class="idea-table">
+        <el-table :data="ideaList" style="width: 100%" @row-click="editIdea">
+          <el-table-column width="55" v-if="ideaList.length <= 0"/>
+          <el-table-column type="selection" width="55" v-else />
+          <el-table-column prop="title" label="标题" width="100" />
+          <el-table-column prop="content" label="内容" width="542" />
+          <el-table-column prop="count" label="总字数" width="200" />
+          <el-table-column prop="createAt" label="最近修改时间" width="180" />
+
+          <template #empty>
+            <el-empty description="空空如也" :image-size="50" />
+          </template>
+        </el-table>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import {EditPen} from "@element-plus/icons-vue";
+import axios from "axios";
 
 export default {
   computed: {
@@ -41,16 +50,72 @@ export default {
       return EditPen
     }
   },
+
   data() {
     return {
       token: '',
-      username: '你好',
-      avatar: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+
+      ideaList: [ ],
+    }
+  },
+
+  created() {
+    const token = localStorage.getItem('token') || ''
+
+    if (token !== '') {
+      this.token = token
+      this.getUserInfo()
+      this.getIdeaList()
+    } else {
+      this.showAuthPage()
     }
   },
 
   methods: {
+    showAuthPage() {
+      this.$router.push('/auth')
+    },
 
+    getUserInfo() {
+      const token = this.token
+      const response = axios.get('http://localhost:8080/api/user/info', {params: {token: token}})
+      response.then(response => {
+        const data = response.data
+        if (data.code === 200) {
+          const avatar = data.result[0].avatar
+          if (avatar !== '') {
+            this.avatar = avatar
+          }
+          this.username = data.result[0].username
+        } else {
+          localStorage.clear('token')
+          this.showAuthPage()
+        }
+      })
+    },
+
+    getIdeaList() {
+      const token = this.token
+      const response = axios.get('http://localhost:8080/api/idea/searchShelf', {params: {token: token}})
+      response.then(response => {
+        const data = response.data
+        const result = data.result
+
+        result.forEach((item) => {
+          item.count = item.content.length
+        })
+
+        this.ideaList = result
+      })
+    },
+
+    editIdea(row) {
+      this.$router.push('/create?id=' + row.ideaID)
+    },
+
+    createIdea() {
+      this.$router.push('/create')
+    }
   }
 }
 </script>
@@ -58,35 +123,11 @@ export default {
 <style scoped>
 .idea__view {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   position: relative;
 }
 
-.page-header {
-  height: 80px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 40px;
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-
-    .user-name {
-      font-size: 14px;
-      color: #7A8087;
-    }
-
-    .user-avatar {
-      margin-left: 5px;
-    }
-  }
-}
-
 .idea-page {
+  margin-top: 80px;
   padding-top: 16px;
 
   .banner-box {
@@ -163,6 +204,10 @@ export default {
       opacity: .6;
       background: linear-gradient(90deg, #F596AAFF 0%, rgba(245, 150, 170, 0) 100%);
     }
+  }
+
+  .idea-table {
+    margin: 0 40px 0 40px;
   }
 }
 

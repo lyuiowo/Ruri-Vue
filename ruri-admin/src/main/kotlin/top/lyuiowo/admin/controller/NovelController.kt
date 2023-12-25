@@ -19,7 +19,17 @@ class NovelController (
 
     private val loggerManager = LoggerManager
 
-    @GetMapping("/search")
+    @GetMapping("/all")
+    fun findAll(
+        request: HttpServletRequest,
+    ): ApiManager<List<Novel>> {
+        val existingNovelList = novelService.findAll()
+        loggerManager.getLogger(request, existingNovelList.code)
+
+        return existingNovelList
+    }
+
+    @GetMapping("/searchKey")
     fun search(
         request: HttpServletRequest,
         @RequestParam q: String
@@ -30,7 +40,7 @@ class NovelController (
         return existingNovelList
     }
 
-    @GetMapping("/searchNovel")
+    @GetMapping("/searchNid")
     fun searchNovel(
         request: HttpServletRequest,
         @RequestParam nid: Int,
@@ -41,8 +51,8 @@ class NovelController (
         return existingNovel
     }
 
-    @GetMapping("/searchMyShelf")
-    fun searchMyShelf(
+    @GetMapping("/searchShelf")
+    fun searchShelf(
         request: HttpServletRequest,
         @RequestParam token: String
     ): ApiManager<List<Novel>> {
@@ -86,18 +96,6 @@ class NovelController (
         @RequestParam token: String
     ): ApiManager<List<Novel>?> {
         val existingNovel = novelService.deleteNovel(id, token)
-        loggerManager.getLogger(request, existingNovel.code)
-
-        return existingNovel
-    }
-
-    @PostMapping("/remove")
-    fun removeNovel(
-        request: HttpServletRequest,
-        @RequestParam id: Int,
-        @RequestParam token: String
-    ): ApiManager<List<Novel>?> {
-        val existingNovel = novelService.removeNovel(id, token)
         loggerManager.getLogger(request, existingNovel.code)
 
         return existingNovel

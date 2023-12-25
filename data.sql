@@ -39,6 +39,7 @@ create table chapter (
     title varchar(100),
     content text,
     create_at timestamp,
+    update_at timestamp,
     status int not null default 0,
     is_deleted boolean not null default false,
     primary key (chapterID, novelID),
@@ -49,9 +50,12 @@ create table chapter (
 create table idea (
     ideaID int auto_increment ,
     authorID UUID not null ,
-    title varchar(255) not null ,
+    title varchar(255) not null default '无标题',
     content text ,
-    primary key (ideaID, authorID),
+    create_at timestamp ,
+    update_at timestamp ,
+    is_hidden boolean default true,
+    primary key (ideaID),
     foreign key (authorID) references user(userID)
 );
 
@@ -83,20 +87,21 @@ END;
 //
 DELIMITER ;
 
--- 插入用户 默认密码：LiuLi1314
+-- 插入用户 默认密码：aa1213
 insert into
     user
-        (userID, userName, avatar, email, password, create_at, last_join_at)
+        (userID, userName, avatar, email, password, create_at, last_join_at, is_admin)
     value
-        ('472041BE-C952-57A2-DB69-E22C207A5EF2', 'Admin', '',  'admin@ru.ri', '$2a$10$k0IIZIzAHP.gGFygjZ5ZgO3g4oNvPdFdy6juml5.IpXbQi2iGXfVa', '2023-11-13 12:00:00', '2023-11-13 12:00:00');
+        ('00000000-0000-0000-0000-000000000000', 'Admin', '',  'admin@ru.ri', '$2a$10$k0IIZIzAHP.gGFygjZ5ZgO3g4oNvPdFdy6juml5.IpXbQi2iGXfVa', '2023-11-13 12:00:00', '2023-11-13 12:00:00', true);
 
 -- 插入小说
 insert into
     novel
         (novelID, name, description, authorID, create_at, update_at)
     values
-        (1, '测试书', '测试描述', '5029b867-5a90-44ef-a3d5-58fa157ca646', '2023-11-13 12:00:00', '2023-11-13 12:00:00'),
-        (2, 'ruri', '测试描述', '5029b867-5a90-44ef-a3d5-58fa157ca646', '2023-11-13 12:00:00', '2023-11-13 12:00:00');
+        (1, '测试书', '测试描述', '00000000-0000-0000-0000-000000000000', '2023-11-13 12:00:00', '2023-11-13 12:00:00'),
+        (2, 'ruri', '测试描述', '00000000-0000-0000-0000-000000000000', '2023-11-13 12:00:00', '2023-11-13 12:00:00'),
+        (3, 'aaaaaaaaaa', '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', '2023-11-13 12:00:00', '2023-11-13 12:00:00');
 
 -- 插入章节
 insert into
@@ -105,3 +110,10 @@ insert into
     values
         (1, 1, '第一章测试', '测试内容', '2023-11-13 12:00:00', 1),
         (2, 1, '第一章测试', '测试内容', '2023-11-13 12:00:00', 0);
+
+-- 插入灵感
+insert into
+    idea
+        (ideaID, authorID, title, content, create_at, update_at, is_hidden)
+    values
+        (1, '00000000-0000-0000-0000-000000000000', '测试', '测试', '2023-11-13 12:00:00', '2023-11-13 12:00:00', false)

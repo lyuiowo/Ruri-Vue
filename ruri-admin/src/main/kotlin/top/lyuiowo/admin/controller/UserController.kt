@@ -43,13 +43,13 @@ class UserController(
     }
 
     @PostMapping("/update")
-    fun updateUsername(
+    fun updateUser(
         request: HttpServletRequest,
-        @RequestParam userID: UUID,
+        @RequestParam token: String,
         @RequestParam username: String,
         @RequestParam email: String
     ): ApiManager<List<User>> {
-        val existingUser = userService.updateUser(userID, username, email)
+        val existingUser = userService.updateUser(token, username, email)
         loggerManager.getLogger(request, existingUser.code)
 
         return existingUser
@@ -77,7 +77,7 @@ class UserController(
         return existingUser
     }
 
-    @GetMapping("/searchUser")
+    @GetMapping("/info")
     fun searchUser(
         request: HttpServletRequest,
         @RequestParam token: String

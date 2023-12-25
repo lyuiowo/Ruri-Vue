@@ -24,6 +24,15 @@ const router = createRouter({
 			component: () => import('../views/AboutView.vue')
 		},
 		{
+			path: '/auth',
+			name: 'auth',
+			component: () => import('../views/AuthView.vue'),
+			beforeEnter: (to, from, next) => {
+				document.querySelector('.navigation-wrapper').style.display = 'none'
+				next()
+			}
+		},
+		{
 			path: '/writer',
 			name: 'writer',
 			component: () => import('../views/WriterView.vue'),
@@ -31,6 +40,11 @@ const router = createRouter({
 				document.querySelector('.navigation-wrapper').style.display = 'none'
 				next()
 			}
+		},
+		{
+			path: '/create',
+			name: 'create',
+			component: () => import('../views/CreateView.vue')
 		}
 	]
 })

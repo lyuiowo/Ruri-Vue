@@ -17,58 +17,62 @@ class NovelService(
     private val chapterRepository: ChapterRepository,
     private val userRepository: UserRepository
 ) {
+
+    val notUser = "00000000-0000-0000-0000-000000000000"
+
+    fun findAll(): ApiManager<List<Novel>> {
+        val existingNovel = novelRepository.findAll()
+        return ApiManager(
+            ResultCode.SUCCESS.code, "查询成功", existingNovel
+        )
+    }
+
     /**
+     * 通过小说名查询小说
      * @param novelName 小说名字
-     * @return 图书信息
+     * @return 小说详细
      */
     fun findNovelByName(novelName: String): ApiManager<List<Novel>> {
         val existingNovel = novelRepository.findNovelByName("%$novelName%")
         if (existingNovel != null) {
             return ApiManager(
-                ResultCode.SUCCESS.code,
-                "查询图书成功",
-                existingNovel
+                ResultCode.SUCCESS.code, "查询小说成功", existingNovel
             )
         }
         return ApiManager(
-            ResultCode.COMMON_FAIL.code,
-            "查询失败",
-            emptyList()
+            ResultCode.COMMON_FAIL.code, "查询失败", null
         )
     }
 
     /**
+     * 通过作者名查询小说
      * @param authorName 作者名字
-     * @return 图书信息
+     * @return 小说详细
      */
     fun findNovelByAuthorName(authorName: String): ApiManager<List<Novel>> {
-        val existingNovel = novelRepository.findByAuthorUsername("%$authorName%")
+        val existingNovel = novelRepository.findByAuthorAndHiddenIsFalse("%$authorName%")
         if (existingNovel != null) {
             return ApiManager(
-                ResultCode.SUCCESS.code,
-                "查询图书成功",
-                existingNovel
+                ResultCode.SUCCESS.code, "查询小说成功", existingNovel
             )
         }
         return ApiManager(
-            ResultCode.COMMON_FAIL.code,
-            "查询失败",
-            emptyList()
+            ResultCode.COMMON_FAIL.code, "查询失败", null
         )
     }
 
     /**
-     * @param
+     * 通过小说 ID 查询小说
+     * @param novelID
+     * @return 小说详细
      */
     fun findNovelByID(novelID: Int): ApiManager<Novel> {
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
         if (existingNovel != null) {
-            return ApiManager(ResultCode.SUCCESS.code, "查询图书成功", existingNovel)
+            return ApiManager(ResultCode.SUCCESS.code, "查询小说成功", existingNovel)
         }
         return ApiManager(
-            ResultCode.COMMON_FAIL.code,
-            "查询失败",
-            null
+            ResultCode.COMMON_FAIL.code, "查询失败", null
         )
     }
 
@@ -85,15 +89,10 @@ class NovelService(
         bookWithName?.let { bookResult.addAll(it) }
         bookWithAuthor?.let { bookResult.addAll(it) }
 
-        bookResult = bookResult
-            .distinctBy { it.novelID }
-            .sortedBy { it.novelID }
-            .toMutableList()
+        bookResult = bookResult.distinctBy { it.novelID }.sortedBy { it.novelID }.toMutableList()
 
         return ApiManager(
-            ResultCode.SUCCESS.code,
-            ResultCode.SUCCESS.msg,
-            bookResult
+            ResultCode.SUCCESS.code, ResultCode.SUCCESS.msg, bookResult
         )
     }
 
@@ -103,14 +102,11 @@ class NovelService(
      * @return 搜索结果
      */
     fun findMyShelf(token: String): ApiManager<List<Novel>> {
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
-        val username = userRepository.findByUserID(userID)?.username
-        val novelList = username?.let { findNovelByAuthorName(it).result }!!
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
+        val novelList = novelRepository.findBySelf(userID)
 
         return ApiManager(
-            ResultCode.SUCCESS.code,
-            ResultCode.SUCCESS.msg,
-            novelList
+            ResultCode.SUCCESS.code, ResultCode.SUCCESS.msg, novelList
         )
     }
 
@@ -122,7 +118,7 @@ class NovelService(
      * @return 创建结果
      */
     fun createNovel(novelName: String, novelDesc: String, token: String): ApiManager<List<Novel>?> {
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
         val author = userRepository.findByUserID(userID)
         val currentTime = LocalDateTime.now()
         return if (author != null) {
@@ -133,9 +129,10 @@ class NovelService(
                 author = author,
                 updateAt = currentTime
             )
-            ApiManager(ResultCode.SUCCESS.code, "创建成功", listOf(novelRepository.save(newNovel)))
+            novelRepository.save(newNovel)
+            ApiManager(ResultCode.SUCCESS.code, "创建成功", listOf(newNovel))
         } else {
-            ApiManager(ResultCode.COMMON_FAIL.code, "创建失败", emptyList())
+            ApiManager(ResultCode.COMMON_FAIL.code, "创建失败", null)
         }
     }
 
@@ -150,7 +147,7 @@ class NovelService(
 
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
         val currentTime = LocalDateTime.now()
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
 
         if (existingNovel != null) {
             if (existingNovel.author.userID == userID) {
@@ -164,7 +161,7 @@ class NovelService(
             }
         }
 
-        return ApiManager(ResultCode.COMMON_FAIL.code, "更新失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "更新失败", null)
     }
 
     /**
@@ -176,7 +173,7 @@ class NovelService(
     fun deleteNovel(novelID: Int, token: String): ApiManager<List<Novel>?> {
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
         val currentTime = LocalDateTime.now()
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
 
         if (existingNovel != null) {
             if (existingNovel.author.userID == userID) {
@@ -189,12 +186,18 @@ class NovelService(
             }
         }
 
-        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", null)
     }
 
-    fun removeNovel(novelID: Int, token: String): ApiManager<List<Novel>?> {
+    /**
+     * 删除小说 - 物理删除
+     * @param novelID 小说 ID
+     * @param token 用户访问令牌
+     * @return 删除信息
+     */
+    fun removeNovel(novelID: Int, token: String): ApiManager<Novel> {
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
 
         if (existingNovel != null) {
             if (existingNovel.author.userID == userID) {
@@ -206,9 +209,9 @@ class NovelService(
                 }
 
                 novelRepository.delete(existingNovel)
-                return ApiManager(ResultCode.SUCCESS.code, "删除成功", emptyList())
+                return ApiManager(ResultCode.SUCCESS.code, "删除成功", existingNovel)
             }
         }
-        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", null)
     }
 }

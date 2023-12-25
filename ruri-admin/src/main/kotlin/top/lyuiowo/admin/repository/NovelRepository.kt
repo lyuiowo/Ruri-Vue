@@ -7,7 +7,6 @@ import top.lyuiowo.admin.model.Novel
 import java.util.UUID
 
 interface NovelRepository : JpaRepository<Novel, String> {
-    override fun findAll(): MutableList<Novel>
 
     fun findNovelByNovelID(novelID: Int): Novel?
 
@@ -15,5 +14,10 @@ interface NovelRepository : JpaRepository<Novel, String> {
     fun findNovelByName(@Param("novelName") novelName: String): List<Novel>?
 
     @Query("select n from Novel n join n.author a where a.username like %:username% and n.isHidden = false")
-    fun findByAuthorUsername(username: String): List<Novel>?
+    fun findByAuthorAndHiddenIsFalse(username: String): List<Novel>?
+
+    @Query("select n from Novel n join n.author a where a.userID = :userID and n.isHidden = false")
+    fun findBySelf(userID: UUID): List<Novel>?
+
+
 }

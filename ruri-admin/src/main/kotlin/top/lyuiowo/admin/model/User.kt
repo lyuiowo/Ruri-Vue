@@ -7,7 +7,6 @@ import org.springframework.security.crypto.bcrypt.BCrypt
 import java.time.LocalDateTime
 import java.util.UUID
 
-
 @Entity
 data class User (
     @Id
@@ -19,6 +18,7 @@ data class User (
     var password: String,
     val createAt: LocalDateTime,
     var lastJoinAt: LocalDateTime,
+    var isAdmin: Boolean = false,
     @get:JsonIgnore
     var isDeleted: Boolean = false
 ) {

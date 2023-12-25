@@ -18,6 +18,7 @@ data class Chapter(
     var title: String,
     var content: String,
     val createAt: LocalDateTime,
+    var updateAt: LocalDateTime,
     var status: Int,
     @get:JsonIgnore
     var isDeleted: Boolean = false

@@ -12,56 +12,62 @@ import java.util.*
 
 @Service
 class ChapterService(
-    private val chapterRepository: ChapterRepository,
-    private val novelRepository: NovelRepository
+    private val chapterRepository: ChapterRepository, private val novelRepository: NovelRepository
 ) {
 
+    val notUser = "00000000-0000-0000-0000-000000000000"
+
     /**
-     * 搜索对应章节信息
+     * 搜索对应章节
      * @param chapterID 章节 ID
-     * @return 对应章节的信息
+     * @return 对应章节的详细
      */
-    fun getInfoByChapterID(chapterID: Int, novelID: Int): ApiManager<Chapter>? {
-        val existingChapter =  chapterRepository.findByChapterIDAndNovelID(chapterID, novelID)
+    fun findChapterByID(chapterID: Int, novelID: Int): ApiManager<Chapter>? {
+        val existingChapter = chapterRepository.findByChapterIDAndNovelID(chapterID, novelID)
 
         if (existingChapter != null) {
             return ApiManager(
-                ResultCode.SUCCESS.code,
-                ResultCode.SUCCESS.msg,
-                existingChapter
+                ResultCode.SUCCESS.code, ResultCode.SUCCESS.msg, existingChapter
             )
         }
         return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, null)
     }
 
     /**
-     * 搜索一本小说下的全部章节信息
+     * 搜索一本小说下的全部章节
      * @param novelID 小说 ID
-     * @return 同本小说下全部章节信息
+     * @return 同本小说下全部章节详细
      */
-    fun getInfoByNovelID(novelID: Int): ApiManager<List<Chapter?>> {
+    fun findChapterByNovelID(novelID: Int): ApiManager<List<Chapter?>> {
         val existingChapter = chapterRepository.findByNovelID(novelID)
 
         return ApiManager(
-            ResultCode.SUCCESS.code,
-            ResultCode.SUCCESS.msg,
-            existingChapter
+            ResultCode.SUCCESS.code, ResultCode.SUCCESS.msg, existingChapter
         )
     }
 
     /**
-     *
+     * 根据小说 ID & 章节标题搜索章节
+     * @param novelID 小说 ID
+     * @param title 章节标题
+     * @return 特定章节详细
      */
-    fun getInfoByTitle(novelID: Int, title: String): ApiManager<Chapter>? {
+    fun findChapterByNovelIDAndTitle(novelID: Int, title: String): ApiManager<Chapter>? {
         val existingChapter = chapterRepository.findByNovelIDAndTitle(novelID, title)
 
         return ApiManager(
-            ResultCode.SUCCESS.code,
-            ResultCode.SUCCESS.msg,
-            existingChapter
+            ResultCode.SUCCESS.code, ResultCode.SUCCESS.msg, existingChapter
         )
     }
 
+    /**
+     * 创建章节
+     * @param novelID 小说 ID
+     * @param title 章节标题
+     * @param content 章节内容
+     * @param token 用户访问令牌
+     * @return 创建章节详细
+     */
     fun createChapter(novelID: Int, title: String, content: String, token: String): ApiManager<List<Chapter>> {
         val userID = TokenManager.extractUserIDFromToken(token)
         val existingNovel = novelRepository.findNovelByNovelID(novelID)
@@ -72,49 +78,59 @@ class ChapterService(
                 title = title,
                 content = content,
                 createAt = currentTime,
-                status = 1,
+                updateAt = currentTime,
+                status = 0,
                 isDeleted = false
             )
 
-            return ApiManager(ResultCode.SUCCESS.code, "创建成功", listOf(chapterRepository.save(newChapter)))
+            chapterRepository.save(newChapter)
+            return ApiManager(ResultCode.SUCCESS.code, "创建成功", listOf(newChapter))
         }
 
-        return ApiManager(ResultCode.INVALID_USER.code, ResultCode.INVALID_USER.msg, emptyList())
+        return ApiManager(ResultCode.INVALID_USER.code, ResultCode.INVALID_USER.msg, null)
     }
 
     /**
      * 更新章节信息
-     * @param chapter 章节对象
+     * @param chapterID 章节 ID
      * @param title 标题
      * @param content 内容
+     * @param token 用户访问令牌
      * @return 更新结果
      */
-    fun updateChapter(chapterID: Int, title: String, content: String, status: Int): ApiManager<List<Chapter>?> {
+    fun updateChapter(
+        chapterID: Int, title: String, content: String, status: Int, token: String
+    ): ApiManager<List<Chapter>?> {
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
         val chapter = chapterRepository.findByChapterID(chapterID)
+
         if (chapter != null && !chapter.isDeleted) {
-            chapter.title = title
-            chapter.content = content
+            val author = novelRepository.findNovelByNovelID(chapter.novelID)?.author?.userID
+            if (author == userID) {
+                chapter.title = title
+                chapter.content = content
 
-            if (status != 0) {
-                chapter.status = status
+                if (status != 0) chapter.status = status
+
+                val updatedChapter = chapterRepository.save(chapter)
+                return ApiManager(
+                    ResultCode.SUCCESS.code, "更新成功", listOf(updatedChapter)
+                )
             }
-
-            val updatedChapter = chapterRepository.save(chapter)
-            return ApiManager(
-                ResultCode.SUCCESS.code, "更新成功", listOf(updatedChapter)
-            )
         }
-        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, null)
     }
 
     /**
-     * 删除章节内容 - 逻辑删除
+     * 删除章节 - 逻辑删除
      * @param chapterID 章节 ID
+     * @param token 用户访问令牌
      * @return 删除结果
      */
     fun deleteChapter(chapterID: Int, token: String): ApiManager<List<Chapter>> {
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
         val chapter = chapterRepository.findByChapterID(chapterID)
+
         if (chapter != null && !chapter.isDeleted) {
             val author = novelRepository.findNovelByNovelID(chapter.novelID)?.author?.userID
             if (author == userID) {
@@ -125,19 +141,25 @@ class ChapterService(
                 )
             }
         }
-        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, ResultCode.COMMON_FAIL.msg, null)
     }
 
-    fun removeChapter(chapterID: Int, token: String): ApiManager<List<Chapter>> {
-        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString("")
+    /**
+     * 删除章节 - 物理删除
+     * @param chapterID 章节 ID
+     * @param token 用户访问令牌
+     * @return 删除结果
+     */
+    fun removeChapter(chapterID: Int, token: String): ApiManager<Chapter> {
+        val userID = TokenManager.extractUserIDFromToken(token) ?: UUID.fromString(notUser)
         val chapter = chapterRepository.findByChapterID(chapterID)
         if (chapter != null) {
             val author = novelRepository.findNovelByNovelID(chapter.novelID)?.author?.userID
             if (author != null && author == userID) {
                 chapterRepository.delete(chapter)
-                return ApiManager(ResultCode.SUCCESS.code, "删除成功", emptyList())
+                return ApiManager(ResultCode.SUCCESS.code, "删除成功", chapter)
             }
         }
-        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", emptyList())
+        return ApiManager(ResultCode.COMMON_FAIL.code, "删除失败", null)
     }
 }

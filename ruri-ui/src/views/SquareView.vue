@@ -1,14 +1,12 @@
 <template>
   <div class="square__view">
-    <div class="page-header">
-      <div class="user-profile">
-        <span class="user-name">{{ username }}</span>
-        <el-avatar class="user-avatar" :size="'small'" :src="avatar"/>
-      </div>
-    </div>
     <div class="square-page">
       <div class="square-position">
-        <el-input class="search-input" :prefix-icon="Search" placeholder="请输入小说名称" v-model="search"></el-input>
+        <el-form class="search">
+          <el-form-item>
+            <el-input class="search-input" :prefix-icon="Search" placeholder="请输入小说名称" v-model="search" @keydown.enter></el-input>
+          </el-form-item>
+        </el-form>
       </div>
       <div class="banner-box">
         <div class="item item-1">
@@ -17,7 +15,11 @@
               梦境广场
             </div>
           </div>
-          <div class="item"></div>
+          <div>
+            <div class="banner-sub">
+              自由探索～
+            </div>
+          </div>
         </div>
         <div class="item item-2"></div>
         <div class="item item-3"></div>
@@ -35,6 +37,7 @@
 
 <script>
 import {Search} from "@element-plus/icons-vue";
+import axios from "axios";
 
 export default {
   computed: {
@@ -47,7 +50,61 @@ export default {
 
   data() {
     return {
-      search: ''
+      token: '',
+
+      search: '',
+      searchResult: [],
+
+      novelList: []
+    }
+  },
+
+  created() {
+    const token = localStorage.getItem('token') || ''
+
+    if (token !== '') {
+      this.token = token
+      this.getUserInfo()
+      this.getAllNovel()
+      this.getAllIdea()
+    } else {
+      this.showAuthPage()
+    }
+  },
+
+  methods: {
+    getUserInfo() {
+      const token = this.token
+      const response = axios.get('http://localhost:8080/api/user/info', {params: {token: token}})
+      response.then(response => {
+        const data = response.data
+        if (data.code === 200) {
+          const avatar = data.result[0].avatar
+          if (avatar !== '') {
+            this.avatar = avatar
+          }
+          this.username = data.result[0].username
+        } else {
+          localStorage.clear('token')
+          this.showAuthPage()
+        }
+      })
+    },
+
+    getAllNovel() {
+      const response = axios.get('http://localhost:8080/api/novel/all')
+      response.then(response => {
+        const data = response.data
+        this.novelList = data.result
+      })
+    },
+
+    getAllIdea() {
+      const response = axios.get('http://localhost:8080/api/idea/all')
+      response.then(response => {
+        const data = response.data
+        console.log(data.result)
+      })
     }
   }
 }
@@ -56,43 +113,22 @@ export default {
 <style>
 .square__view {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   position: relative;
 }
 
-.page-header {
-  height: 80px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 40px;
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-
-    .user-name {
-      font-size: 14px;
-      color: #7A8087;
-    }
-
-    .user-avatar {
-      margin-left: 5px;
-    }
-  }
-}
-
 .square-page {
+  margin-top: 80px;
   padding-top: 16px;
 
-  .search-input {
-    width: 640px;
-    height: 36px;
+  .square-position {
     position: absolute;
     top: 24px;
     left: 40px;
+  }
+
+  .search-input {
+    width: 520px;
+    height: 30px;
     border: none;
 
     > .el-input__wrapper {
@@ -129,6 +165,12 @@ export default {
         margin-bottom: 7px;
         white-space: nowrap;
         position: absolute;
+      }
+
+      .banner-sub {
+        color: #3e5870;
+        font-size: 16px;
+        white-space: nowrap;
       }
     }
 

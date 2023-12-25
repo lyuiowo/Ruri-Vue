@@ -10,10 +10,6 @@ import top.lyuiowo.admin.model.Chapter
 import top.lyuiowo.admin.service.ChapterService
 import top.lyuiowo.admin.utils.ApiManager
 import top.lyuiowo.admin.utils.LoggerManager
-import top.lyuiowo.admin.utils.ResultCode
-import top.lyuiowo.admin.utils.TokenManager
-import java.time.LocalDateTime
-import java.util.UUID
 
 @RestController
 @RequestMapping("api/chapter")
@@ -32,12 +28,12 @@ class ChapterController(
     ): ApiManager<out Any>? {
         val existingChapter = if (cid != null) {
             if (title != null) {
-                chapterService.getInfoByTitle(nid, title)
+                chapterService.findChapterByNovelIDAndTitle(nid, title)
             } else {
-                chapterService.getInfoByChapterID(cid, nid)
+                chapterService.findChapterByID(cid, nid)
             }
         } else {
-            chapterService.getInfoByNovelID(nid)
+            chapterService.findChapterByNovelID(nid)
         }
         loggerManager.getLogger(request, 200)
         return existingChapter
@@ -63,9 +59,10 @@ class ChapterController(
         @RequestParam id: Int,
         @RequestParam title: String,
         @RequestParam content: String,
-        @RequestParam status: Int
+        @RequestParam status: Int,
+        @RequestParam token: String
     ): ApiManager<List<Chapter>?> {
-        val existingChapter = chapterService.updateChapter(id, title, content, status)
+        val existingChapter = chapterService.updateChapter(id, title, content, status, token)
         loggerManager.getLogger(request, existingChapter.code)
 
         return existingChapter

@@ -2,8 +2,8 @@
   <div class="editor-wrapper">
     <div class="editor-header">
       <div class="navbar">
-        <el-tag class="nav-btn">
-          <el-icon color="#ebebeb"> <Menu /> </el-icon>
+        <el-tag class="nav-btn" @click="back">
+          <el-icon color="#999"> <Back /> </el-icon>
         </el-tag>
       </div>
       <div class="info-box">
@@ -19,11 +19,11 @@
         <div class="item" />
       </div>
       <div class="tools-bar">
-        <el-button class="save-btn" @click="saveChapter(novelID)">
+        <el-button class="save-btn btn" @click="saveChapter(novelID)">
           <el-icon><CirclePlusFilled /></el-icon>
           <span>保存</span>
         </el-button>
-        <el-button class="save-btn" @click="saveChapter(novelID)">
+        <el-button class="send-btn btn" @click="saveChapter(novelID)">
           <el-icon><Position /></el-icon>
           <span>发布</span>
         </el-button>
@@ -51,6 +51,7 @@
               tabindex="2"
               placeholder="请输入章节正文。"
               resize="none"
+              :show-word-limit="true"
               :autosize="{ minRows: 5 }"
             />
           </div>
@@ -62,11 +63,11 @@
             <div class="title">
               {{ novelTitle }}
             </div>
-            <div class="descrption">每次修改都记得保存哦</div>
+            <div class="description">每次修改都记得保存哦</div>
           </div>
           <div class="chapter-list-box">
             <el-collapse class="list-box" v-model="active">
-              <el-collapse-item class="status-list" v-for="status in statusList">
+              <el-collapse-item class="status-list" v-for="status in statusList" :name="status.status">
                 <template #title>
                   <div class="title-box">
                     {{ status.title }}
@@ -85,23 +86,24 @@
 </template>
 
 <script>
-import {CirclePlusFilled, EditPen, Menu, Position} from '@element-plus/icons-vue'
+import {Back, CirclePlusFilled, EditPen, Position} from '@element-plus/icons-vue'
 import axios from "axios";
 import {ElMessage, ElMessageBox} from "element-plus";
 export default {
-  components: {Position, CirclePlusFilled, EditPen, Menu},
+  components: {Back, Position, CirclePlusFilled, EditPen},
 
   data() {
     return {
       count: 0,
       title: "",
       content: "",
+      token: '',
 
       novelTitle: "",
       novelID: 0,
       chapterID: null,
 
-      active: [],
+      active: [0, 1, 2],
       statusList: [ {title: '已保存', status: 0}, {title: "已发布", status: 1}, {title: "已删除", status: 2} ],
       chapterList: {
         0: [ ],
@@ -112,6 +114,14 @@ export default {
   },
 
   created() {
+    const token = localStorage.getItem('token') || ''
+
+    if (token !== '') {
+      this.token = token
+    } else {
+      this.showAuthPage()
+    }
+
     const nid = this.$route.query.nid
     this.novelID = nid
     const cid = this.$route.query.cid || ''
@@ -133,13 +143,22 @@ export default {
   },
 
   methods: {
+    showAuthPage() {
+      this.$router.push('/auth')
+    },
+
+    back() {
+      document.querySelector('.navigation-wrapper').style.display = 'block'
+      this.$router.push('/')
+    },
+
     countNum() {
       const content = this.content.replace(/(\n)+/g, '<br>');
       this.count = this.content.length
     },
 
     searchNovelTitle(nid) {
-      axios.get("http://localhost:8080/api/novel/searchNovel", { params: { nid: nid } }).then(response => {
+      axios.get("http://localhost:8080/api/novel/searchNid", { params: { nid: nid } }).then(response => {
         const novel = response.data.result
         this.novelTitle = novel.name
       })
@@ -281,7 +300,7 @@ export default {
     .tools-bar {
       padding-right: 40px;
 
-      .save-btn {
+      .btn {
         width: 98px;
         height: 32px;
         background: transparent;
@@ -292,6 +311,11 @@ export default {
       .save-btn:hover {
         border: #ec7070 1px solid;
         color: #ec7070;
+      }
+
+      .send-btn:hover {
+        border: #626aef 1px solid;;
+        color: #626aef;
       }
     }
   }
@@ -391,7 +415,7 @@ export default {
         margin-bottom: 4px;
       }
 
-      .descrption {
+      .description {
         color: #898a95;
         font-size: 12px;
         font-weight: 400;

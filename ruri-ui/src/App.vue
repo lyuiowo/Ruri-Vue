@@ -1,5 +1,5 @@
 <template>
-  <div class="index-wrapper">
+  <div class="app-wrapper">
     <div class="index-slider navigation-wrapper">
       <div class="navigation-inner-wrapper">
         <div class="navigation-title">
@@ -8,42 +8,49 @@
         <div class="navigation-bars">
           <div class="slider-url-list">
             <el-tag class="slider-btn btn-component" :class="showPage === 0 ? 'active' : ''" @click="showNovelPage">
-              <el-icon class="slider-btn-icon"> <Compass /> </el-icon>
+              <el-icon class="slider-btn-icon">
+                <Compass/>
+              </el-icon>
               <span class="slider-btn-text">我的小说</span>
             </el-tag>
             <el-tag class="slider-btn btn-component" :class="showPage === 1 ? 'active' : ''" @click="showIdeaPage">
-              <el-icon class="slider-btn-icon"> <Notebook /> </el-icon>
-              <span class="slider-btn-text">我的设定集</span>
+              <el-icon class="slider-btn-icon">
+                <Notebook/>
+              </el-icon>
+              <span class="slider-btn-text">我的灵感集</span>
             </el-tag>
           </div>
           <div class="slider-line"></div>
           <div class="slider-url-list">
             <el-tag class="slider-btn btn-component" :class="showPage === 2 ? 'active' : ''" @click="showSquarePage">
-              <el-icon class="slider-btn-icon"> <Management /> </el-icon>
+              <el-icon class="slider-btn-icon">
+                <Management/>
+              </el-icon>
               <span class="slider-btn-text">广场</span>
             </el-tag>
           </div>
           <div class="slider-line"></div>
           <div class="slider-url-list">
             <el-tag class="slider-btn btn-component" :class="showPage === 3 ? 'active' : ''" @click="showAboutPage">
-              <el-icon class="slider-btn-icon"> <Warning /> </el-icon>
-              <span class="slider-btn-text">关于</span>
+              <el-icon class="slider-btn-icon">
+                <User />
+              </el-icon>
+              <span class="slider-btn-text">用户空间</span>
             </el-tag>
           </div>
         </div>
       </div>
     </div>
 
-    <router-view>
-    </router-view>
+    <router-view />
   </div>
 </template>
 
 <script>
-import {Compass, Management, Notebook, Warning} from "@element-plus/icons-vue";
+import {Compass, Management, Notebook, Warning, User} from "@element-plus/icons-vue";
 
 export default {
-  components: {Warning, Management, Notebook, Compass},
+  components: {Warning, Management, Notebook, Compass, User},
 
   data() {
     return {
@@ -89,14 +96,18 @@ export default {
     showAboutPage() {
       this.showPage = 3
       this.$router.push('/about')
+    },
+
+    showAuthPage() {
+      this.$router.push('/auth')
     }
   }
 }
 </script>
 
 <style scoped>
-.index-wrapper {
-  height: 100vh;
+.app-wrapper {
+  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: row;

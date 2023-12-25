@@ -6,19 +6,17 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-data class Novel (
+data class Idea(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val novelID: Int ?= null,
-    var name: String,
-    var description: String,
+    val ideaID: Int? = null,
     @ManyToOne @JoinColumn(name = "authorID") @get:JsonIgnore
     val author: User,
+    var title: String,
+    var content: String,
     val createAt: LocalDateTime,
     var updateAt: LocalDateTime,
-    @get:JsonIgnore
-    var isHidden: Boolean = false,
-    var totalChapterNum: Int ?= null
+    var isHidden: Boolean
 ) {
     @Transient
     @JsonProperty("authorName")
