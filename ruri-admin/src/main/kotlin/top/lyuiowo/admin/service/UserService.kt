@@ -93,13 +93,14 @@ class UserService(
      * @param userID 用户 UUID
      * @return 删除结果
      */
-    fun deleteUser(userID: UUID): ApiManager<List<Unit>?> {
+    fun deleteUser(userID: UUID): ApiManager<List<User>?> {
         val existingUser = userRepository.findByUserID(userID)
 
         return if (existingUser == null) {
             ApiManager(ResultCode.INVALID_USER.code, ResultCode.INVALID_USER.msg, null)
         } else {
-            ApiManager(ResultCode.SUCCESS.code, "删除成功", listOf(userRepository.delete(existingUser)))
+            userRepository.delete(existingUser)
+            ApiManager(ResultCode.SUCCESS.code, "删除成功", listOf(existingUser))
         }
     }
 
@@ -119,7 +120,8 @@ class UserService(
             } else {
                 user.username = username
                 user.email = email
-                ApiManager(ResultCode.SUCCESS.code, "更新成功", listOf(userRepository.save(user)))
+                userRepository.save(user)
+                ApiManager(ResultCode.SUCCESS.code, "更新成功", listOf(user))
             }
         }
         return ApiManager(ResultCode.INVALID_USER.code, ResultCode.INVALID_USER.msg, null)

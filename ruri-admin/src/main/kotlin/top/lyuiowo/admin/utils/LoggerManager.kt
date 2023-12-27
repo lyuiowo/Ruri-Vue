@@ -12,9 +12,9 @@ class LoggerManager {
         private val logger = KotlinLogging.logger { }
         private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-        private val ResetColor = "\u001B[0m"
-        private val ErrorColor = "\u001B[31m"
-        private val SuccessColor = "\u001B[32m"
+        private const val ResetColor = "\u001B[0m"
+        private const val ErrorColor = "\u001B[31m"
+        private const val SuccessColor = "\u001B[32m"
 
         fun getLogger(
             request: HttpServletRequest,

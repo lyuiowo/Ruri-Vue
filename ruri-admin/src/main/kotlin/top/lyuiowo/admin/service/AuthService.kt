@@ -11,7 +11,8 @@ import java.util.UUID
 
 @Service
 class AuthService(
-    private val userRepository: UserRepository, private val userService: UserService
+    private val userRepository: UserRepository,
+    private val userService: UserService
 ) {
 
     val notUser = "00000000-0000-0000-0000-000000000000"

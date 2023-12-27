@@ -43,7 +43,7 @@ class IdeaService(
      * 创建灵感
      * @param title 标题
      * @param content 内容
-     * @param token
+     * @param token 用户令牌
      * @return 创建结果
      */
     fun createIdea(title: String, content: String, hidden: Boolean, token: String): ApiManager<List<Idea>> {

@@ -91,7 +91,6 @@ import axios from "axios";
 import {ElMessage, ElMessageBox} from "element-plus";
 export default {
   components: {Back, Position, CirclePlusFilled, EditPen},
-
   data() {
     return {
       count: 0,

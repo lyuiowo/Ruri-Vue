@@ -22,7 +22,7 @@
           <div class="title">
             我的书架
           </div>
-          <div class="card-list">
+          <div class="card-list" v-if="novelList.length !== 0">
             <div class="card-item" v-for="(item) in novelList" :key="item.novelID">
               <div class="novel-title">
                 <span>
@@ -42,12 +42,16 @@
               </div>
             </div>
           </div>
+          <div class="card-list empty" v-else>
+            <el-empty description="暂无小说" />
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <ProfileManage v-model="showProfileEdit" :profile="profile"/>
+  <NovelManage v-model="showNovelEdit" :novel-data="novel"/>
 </template>
 
 <script>
@@ -56,6 +60,7 @@ import axios from "axios";
 import {Delete, EditPen} from "@element-plus/icons-vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import ProfileManage from "@/components/ProfileManage.vue";
+import NovelManage from "@/components/NovelManage.vue";
 
 export default {
   computed: {
@@ -67,6 +72,7 @@ export default {
     }
   },
   components: {
+    NovelManage,
     ProfileManage,
     EditPen,
     ActiveGraph
@@ -86,8 +92,8 @@ export default {
         email: ''
       },
 
-      showNovelEdit: true,
-      novelForm: {
+      showNovelEdit: false,
+      novel: {
         name: '',
         desc: ''
       }
@@ -108,14 +114,6 @@ export default {
   methods: {
     showAuthPage() {
       this.$router.push('/auth')
-    },
-
-    showEditProfileDialog() {
-
-    },
-
-    showEditNovelDialog() {
-
     },
 
     getUserInfo() {
@@ -150,10 +148,8 @@ export default {
 
     editNovel(novel) {
       console.log(novel)
-      const token = this.token
-      const novelForm = this.novelForm
-      novelForm.id = novel.novelID
-      const response = axios.post('http://localhost:8080/api/novel/update', null, { params: novelForm })
+      this.novel = novel
+      this.showNovelEdit = true
     },
 
     deleteNovel(nid) {
@@ -237,6 +233,11 @@ export default {
 
 .title {
   font-size: 18px;
+}
+
+.card-list.empty {
+  display: block;
+  width: 100%;
 }
 
 .card-list {

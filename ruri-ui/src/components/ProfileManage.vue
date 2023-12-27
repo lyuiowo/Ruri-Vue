@@ -38,6 +38,7 @@
 
 <script>
 import axios from "axios";
+import {ElMessage} from "element-plus";
 
 export default {
 
@@ -95,7 +96,15 @@ export default {
         const token = localStorage.getItem('token')
         const profile = this.profile
         profile.token = token
-        const response = axios.post('http://localhost:8080/api/user/update', null, profile)
+        const response = axios.post('http://localhost:8080/api/user/update', null, {params: profile})
+        response.then(response => {
+          const data = response.data
+          if (data.code === 200) {
+            ElMessage.success(data.msg)
+          } else {
+            ElMessage.error(data.msg)
+          }
+        })
       }
     },
 
@@ -106,7 +115,16 @@ export default {
         const password = this.password
         password.token = token
 
-        // const response = axios.post('http://localhost:8080/api/change', null, password)
+        const response = await axios.post('http://localhost:8080/api/change', null, {params: password})
+        response.then(response => {
+          const data = response.data
+          if (data.code === 200) {
+            ElMessage.success(data.msg)
+          } else {
+            ElMessage.error(data.msg)
+          }
+        })
+
 
         console.log(password)
       }

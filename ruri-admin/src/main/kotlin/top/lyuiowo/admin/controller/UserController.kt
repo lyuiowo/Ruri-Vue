@@ -70,7 +70,7 @@ class UserController(
     fun deleteUser(
         request: HttpServletRequest,
         @RequestParam userID: UUID
-    ): ApiManager<List<Unit>?> {
+    ): ApiManager<List<User>?> {
         val existingUser = userService.deleteUser(userID)
         loggerManager.getLogger(request, existingUser.code)
 

@@ -25,14 +25,14 @@
       <div class="idea-table">
         <el-table :data="ideaList" style="width: 100%" @row-click="editIdea">
           <el-table-column width="55" v-if="ideaList.length <= 0"/>
-          <el-table-column type="selection" width="55" v-else />
-          <el-table-column prop="title" label="标题" width="100" />
-          <el-table-column prop="content" label="内容" width="542" />
-          <el-table-column prop="count" label="总字数" width="200" />
-          <el-table-column prop="createAt" label="最近修改时间" width="180" />
+          <el-table-column type="selection" width="55" v-else/>
+          <el-table-column prop="title" label="标题" width="100"/>
+          <el-table-column prop="content" label="内容" width="542"/>
+          <el-table-column prop="count" label="总字数" width="200"/>
+          <el-table-column prop="createAt" label="最近修改时间" width="180"/>
 
           <template #empty>
-            <el-empty description="空空如也" :image-size="50" />
+            <el-empty description="空空如也" :image-size="50"/>
           </template>
         </el-table>
       </div>
@@ -55,7 +55,7 @@ export default {
     return {
       token: '',
 
-      ideaList: [ ],
+      ideaList: [],
     }
   },
 
